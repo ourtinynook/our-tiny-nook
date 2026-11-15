@@ -351,6 +351,12 @@ mark{background:#F6C453;color:var(--text);padding:0 2px}
 .box{width:30px;height:30px;display:grid;place-items:center;flex:none;margin:3px;--t:3px;--fill:#FFFDF5;--hi:#FFFFFF;--lo:#EFE3C6;filter:none}
 .item.done .box{--fill:#7BC67B;--hi:#A2DBA2;--lo:#5BAE5E}
 .box .spr{opacity:0}.item.done .box .spr{opacity:1}
+.item .box{border:0;padding:0;cursor:pointer;width:34px;height:34px}
+.tbtn{background:none;border:0;text-align:left;font:inherit;color:inherit;padding:8px 0;min-height:44px;cursor:pointer;min-width:0;overflow-wrap:anywhere}
+.ib{background:none;border:0;padding:0;min-width:40px;min-height:40px;display:grid;place-items:center;cursor:pointer;flex:none;opacity:.9}
+.evb{display:flex;gap:2px;flex:none;margin-left:auto}
+.item.editing,.evedit{width:100%;flex-direction:column;align-items:stretch;gap:8px;padding:8px 0}
+.evedit{display:flex}
 .item.done .tx{text-decoration:line-through;text-decoration-thickness:3px;color:var(--muted)}
 .by{width:12px;height:12px;flex:none;box-shadow:0 0 0 2px var(--ink)}
 .by.a{background:#F4978E}.by.b{background:#8EC9F0}
@@ -468,6 +474,8 @@ const SP={
   flower:mirror(["..pp",".ppy","ppyy",".ppy","..pp","...g","..gg","...g"]),
   cloud:[".... wwww......".replace(' ',''),"..wwwwwwwwww..",".wwwwwwwwwwwww","wwwwwwwwwwwwww",".llllllllllll."],
   star:["...y...","...y...","yyyyyyy",".yyyyy.","..yyy..",".yy.yy.",".y...y."],
+  x:['k...k','.k.k.','..k..','.k.k.','k...k'],
+  pencil:['.....kk','....kyk','...kyk.','..kyk..','.kyk...','kwk....','kk.....'],
   bfly:mirror(["k..k","kckk","kccC",".kcC","..kk"]),
   lock:["..kkkk..",".k....k.",".k....k.","kkkkkkkk","kyyyyyyk","kyykkyyk","kyyyyyyk","kkkkkkkk"],
   tick:["......k",".....kk","k...kk.","kk.kk..",".kkk...","..k...."]
@@ -625,6 +633,21 @@ const sumAmt=l=>l.reduce((s,e)=>s+e.amt,0);
 
 function evHtml(e){return `<div class="ev"><div class="time">${e.t}</div><span class="mk ${e.who}"></span><div class="grow"><div class="t">${esc(e.title)}</div><div class="w">${whoLabel(e.who)}</div></div></div>`}
 
+function evRow(e){
+  const i=S.events.indexOf(e);
+  if(S.evedit===i)return `<form class="form evedit" id="evedit"><input class="pxin px s" type="text" id="edtitle" value="${esc(e.title)}" aria-label="Plan title" required><input class="pxin px s" type="date" id="eddate" value="${e.date||isoOff(e.d)}" aria-label="Date" required><input class="pxin px s" type="time" id="edtime" value="${e.t}" aria-label="Time"><select class="pxin px s" id="edwho" aria-label="Who"><option value="both"${e.who==='both'?' selected':''}>Both of you</option><option value="${me()}"${e.who===me()?' selected':''}>Just ${esc(P[me()].name)}</option><option value="${other()}"${e.who===other()?' selected':''}>Just ${esc(P[other()].name)}</option></select><div class="row" style="flex-wrap:wrap"><button class="btn px s me-${me()}" type="submit">Save</button><button class="btn px s c-white" type="button" data-act="evcancel">Cancel</button></div></form>`;
+  if(S.evdel===i)return `<div class="ev"><div class="grow"><div class="t">Delete "${esc(e.title)}"?</div><div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="btn px s c-coral" data-act="evdelyes" data-v="${i}">Delete</button><button class="btn px s c-white" data-act="evdelno">Keep it</button></div></div></div>`;
+  return `<div class="ev"><div class="time">${e.t}</div><span class="mk ${e.who}"></span><div class="grow"><div class="t">${esc(e.title)}</div><div class="w">${whoLabel(e.who)}</div></div><div class="evb"><button class="ib" data-act="evedit" data-v="${i}" aria-label="Edit plan">${spr(SP.pencil,3)}</button><button class="ib" data-act="evdel" data-v="${i}" aria-label="Delete plan">${spr(SP.x,3)}</button></div></div>`;
+}
+function sweepLists(){
+  const td=todayIso();
+  ['groceries','todo'].forEach(k=>{
+    const L=S.lists[k];if(!L)return;
+    L.forEach(it=>{if(it.done&&!it.doneOn)it.doneOn=td;if(!it.done&&it.doneOn)delete it.doneOn});
+    const keep=L.filter(it=>!(it.done&&it.doneOn&&it.doneOn<td));
+    if(keep.length!==L.length)S.lists[k]=keep;
+  });
+}
 const V={};
 function cardHead(title,go,label){return `<div class="row" style="justify-content:space-between;margin-bottom:10px"><p class="eyebrow" style="margin:0">${FL(2)}${title}</p><button class="btn px s c-gold" style="min-height:40px;padding:0 12px;font-size:15px" data-act="go" data-v="${go}">${label||'Open'}</button></div>`}
 const tenBlocks=f=>Array.from({length:10},(_,i)=>`<i class="${i<f?'f':''}"></i>`).join('');
@@ -745,7 +768,7 @@ V.plan=()=>{
   return `
   <div class="week">${strip}</div>
   <section class="card px" id="daycard"><h2>${dd}</h2>
-    <div class="evs" style="margin-top:14px">${list.length?list.map(evHtml).join(''):'<div class="muted">Nothing planned for this day yet.</div>'}</div></section>
+    <div class="evs" style="margin-top:14px">${list.length?list.map(evRow).join(''):'<div class="muted">Nothing planned for this day yet.</div>'}</div></section>
   ${S.adding?`<section class="card px"><p class="eyebrow">${FL(2)}New plan</p>
     <form class="form" id="evform">
       <input class="pxin px s" type="text" id="evtitle" placeholder="What are you planning?" aria-label="Plan title" required>
@@ -768,7 +791,8 @@ V.lists=()=>{
   <section class="card px">
     <div class="row" style="justify-content:space-between"><h2>${names[S.list]}</h2><span class="muted">${done} of ${L.length}</span></div>
     <div class="blocks" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i class="${i<filled?'f':''}"></i>`).join('')}</div>
-    <div style="margin-top:6px">${L.map((it,i)=>`<button class="item ${it.done?'done':''}" data-act="toggle" data-v="${i}"><span class="box px s">${spr(SP.tick,2.5)}</span><span class="grow tx">${esc(it.t)}</span><span class="by ${it.by}" title="Added by ${P[it.by].name}"></span></button>`).join('')}</div>
+    <div style="margin-top:6px">${L.map((it,i)=>S.ledit===i?`<form class="form item editing" id="ledform"><input class="pxin px s" type="text" id="ledtext" value="${esc(it.t)}" aria-label="Edit item" required><div class="row" style="flex-wrap:wrap"><button class="btn px s me-${me()}" type="submit">Save</button><button class="btn px s c-white" type="button" data-act="lcancel">Cancel</button></div></form>`:`<div class="item ${it.done?'done':''}"><button class="box px s" data-act="toggle" data-v="${i}" aria-label="${it.done?'Mark as not done':'Mark as done'}">${spr(SP.tick,2.5)}</button><button class="grow tx tbtn" data-act="ledit" data-v="${i}" aria-label="Edit ${esc(it.t)}">${esc(it.t)}</button><span class="by ${it.by}" title="Added by ${esc(P[it.by]?P[it.by].name:'')}"></span><button class="ib" data-act="ldel" data-v="${i}" aria-label="Remove ${esc(it.t)}">${spr(SP.x,3)}</button></div>`).join('')}</div>
+    ${S.list!=='bucket'?'<div class="muted" style="font-size:14px;margin-top:8px">Ticked items clear themselves at the end of the day. Tap an item to change it.</div>':'<div class="muted" style="font-size:14px;margin-top:8px">Tap an item to change it.</div>'}
   </section>
   <form class="form" id="itemform"><input class="pxin px s" type="text" id="newitem" placeholder="${ph[S.list]}" aria-label="New item" required><button class="btn px s me-${me()}" type="submit">Add</button></form>`;
 };
@@ -896,6 +920,7 @@ V.memories=()=>{
 };
 
 function render(){
+  sweepLists();
   S.events.forEach(e=>{if(e.date)e.d=dayDiff(e.date)});
   $('#title').textContent=S.tab==='home'?S.appName:TITLES[S.tab];
   $('#view').innerHTML=V[S.tab]();
@@ -916,10 +941,10 @@ document.addEventListener('click',e=>{
   if(a.startsWith('tet-')){teAct(a);return}
   if(/^(ttt|c4|pz|uno)-/.test(a)){gAct(a,v);render();return}
   if(a==='game'){if(v==='sudoku'&&!S.su)suNew('easy');if(v==='scrabble'&&!S.sc)scNew();gOpen(v);S.tab=v;window.scrollTo(0,0);render();return}
-  if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;window.scrollTo(0,0)}
+  if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;S.ledit=null;S.evedit=null;S.evdel=null;window.scrollTo(0,0)}
   else if(a==='mood'){S.mood[me()]=v;const td=todayIso();if(S.moodDay[me()]!==td){S.moodDay[me()]=td;earn(2,'Mood shared')}}
   else if(a==='think'){S.thinkTs[me()]=Date.now();toast('Sent to '+P[other()].name+'. They will see it right away.');const td=todayIso();if(S.thinkDay[me()]!==td){S.thinkDay[me()]=td;earn(1,'Sent to '+P[other()].name)}render();return}
-  else if(a==='day'){S.day=+v;S.adding=false}
+  else if(a==='day'){S.day=+v;S.adding=false;S.evedit=null;S.evdel=null}
   else if(a==='mday'){S.day=+v;S.adding=false;S.scrollDay=true}
   else if(a==='mprev'){S.mon=(S.mon||0)-1}
   else if(a==='mnext'){S.mon=(S.mon||0)+1}
@@ -937,6 +962,8 @@ document.addEventListener('click',e=>{
   else if(a==='sq'){S.q=v;S.focusQ=true}
   else if(a==='look'){if(owns(me(),'theme',v))applyLook(v);else{S.tab='shop';S.shopTab='theme';toast('Buy this look in the Shop first');window.scrollTo(0,0)}}
   else if(a==='signout'){doSignOut();return}
+  else if(a==='pushon'){pushOn();return}
+  else if(a==='pushoff'){pushOff();return}
   else if(a==='bkfile'){try{const bl=new Blob([JSON.stringify(backupObj())],{type:'application/json'}),u=URL.createObjectURL(bl),an=document.createElement('a');an.href=u;an.download='our-nook-backup-'+todayIso()+'.json';document.body.appendChild(an);an.click();an.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Backup file saved')}catch(err){toast('Could not save a file. Use Copy backup text instead.')}}
   else if(a==='bk'){S.bk=JSON.stringify(backupObj(),null,1);try{navigator.clipboard.writeText(S.bk).then(()=>toast('Backup copied'),()=>toast('Select the text below to copy it'))}catch(err){toast('Select the text below to copy it')}}
   else if(a==='rest'){S.rtxt=($('#restoretext')||{}).value||'';if(!S.rtxt.trim()){toast('Paste your backup text first.');return}S.rconf=true}
@@ -961,8 +988,16 @@ document.addEventListener('click',e=>{
     return}
   else if(a==='add'){S.adding=true}
   else if(a==='cancel'){S.adding=false}
-  else if(a==='list'){S.list=v}
-  else if(a==='toggle'){const it=S.lists[S.list][+v];it.done=!it.done;if(it.done&&!it.paid){it.paid=true;earn(2,'Ticked off')}}
+  else if(a==='list'){S.list=v;S.ledit=null}
+  else if(a==='ledit'){S.ledit=+v;setTimeout(()=>{const x=$('#ledtext');if(x){x.focus();x.select()}},60)}
+  else if(a==='lcancel'){S.ledit=null}
+  else if(a==='ldel'){S.lists[S.list].splice(+v,1);S.ledit=null;toast('Removed')}
+  else if(a==='evedit'){S.evedit=+v;S.evdel=null;setTimeout(()=>{const x=$('#edtitle');if(x)x.focus()},60)}
+  else if(a==='evcancel'){S.evedit=null}
+  else if(a==='evdel'){S.evdel=+v;S.evedit=null}
+  else if(a==='evdelno'){S.evdel=null}
+  else if(a==='evdelyes'){S.events.splice(+v,1);S.evdel=null;toast('Plan deleted')}
+  else if(a==='toggle'){const it=S.lists[S.list][+v];it.done=!it.done;if(it.done)it.doneOn=todayIso();else delete it.doneOn;if(it.done&&!it.paid){it.paid=true;earn(2,'Ticked off')}}
   else if(a==='fav'){const m=S.mems.find(x=>x.id===+v);if(m)m.fav=!m.fav}
   else if(a==='addmem'){S.madd=true;S.mphoto=null}
   else if(a==='mcancel'){S.madd=false;S.mphoto=null}
@@ -982,6 +1017,11 @@ document.addEventListener('submit',e=>{
   if(id==='evform'){
     S.events.push({d:S.day,date:isoOff(S.day),t:$('#evtime').value||'12:00',title:$('#evtitle').value.trim(),who:$('#evwho').value});
     S.adding=false;render();toast('Plan added');earn(3,'Plan added');
+  }else if(id==='ledform'){
+    const it=S.lists[S.list][S.ledit];const v=$('#ledtext').value.trim();if(it&&v)it.t=v;S.ledit=null;render();
+  }else if(id==='evedit'){
+    const e=S.events[S.evedit];if(e){e.title=$('#edtitle').value.trim()||e.title;e.t=$('#edtime').value||e.t;e.who=$('#edwho').value;const d=$('#eddate').value;if(d){e.date=d;e.d=dayDiff(d)}}
+    S.evedit=null;render();toast('Plan updated');
   }else if(id==='itemform'){
     const v=$('#newitem').value.trim();if(!v)return;
     S.lists[S.list].push({t:v,done:false,by:me()});render();$('#newitem').focus();
@@ -1695,6 +1735,7 @@ V.settings=()=>{
     <div class="row" style="gap:10px">${av(me(),4)}<div style="min-width:0"><b>${esc(P[me()].name)}</b><div class="muted" style="font-size:14px;overflow-wrap:anywhere">${esc(em)}</div></div></div>
     <div class="muted" style="font-size:14px;margin:10px 0">Everything except money is shared with ${esc(P[other()].name)}. Your money stays private to you.</div>
     <button class="btn px s c-white" data-act="signout">Sign out</button></section>
+  <section class="card px"><p class="eyebrow">${FL(2)}Notifications</p>${pushCard()}</section>
   <section class="card px"><p class="eyebrow">${FL(2)}Look of the world</p>
     <div class="looks">${Object.entries(LOOKS).map(([k,L])=>`<button class="look px s ${S.look===k?'on':'c-white'}" data-act="look" data-v="${k}" aria-pressed="${S.look===k}"><span class="sw2" style="background:${swatch(L)}"></span>${L.name}${owns(me(),'theme',k)?'':' \u00b7 '+SHOP.theme[k]+' coins'}</button>`).join('')}</div>
     <div class="muted" style="font-size:14px;margin-top:12px">Each look changes the sky, the grass and what drifts through the air.</div></section>
@@ -1719,6 +1760,42 @@ document.addEventListener('input',e=>{
 const EMAILS={'shazay128@gmail.com':'a','syahirulsyahmi5@gmail.com':'b'};
 const uid2=()=>Date.now()*1000+Math.floor(Math.random()*1000);
 const dayDiff=iso=>Math.round((new Date(iso+'T12:00:00')-new Date(todayIso()+'T12:00:00'))/864e5);
+const VAPID_PUB='BCZupjCkWis7KjqrPxtt0C9ZOEvTF8Fo6lS9-apSDOaxPI7_znW2ow4L8qrKrUyjX81isX2FRAUz4ZXjXTGg6Sk';
+const u8=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s);return Uint8Array.from(b,c=>c.charCodeAt(0))};
+S.pushState='unknown';
+function pushCard(){
+  const st=S.pushState;
+  const what='Reminders before plans, a morning summary, thinking of you, and new memories or replies.';
+  if(st==='unsupported')return `<div class="muted">${what}</div><div class="muted" style="margin-top:8px">This needs the app on your Home Screen. On iPhone: tap Share in Safari, then Add to Home Screen, then open Our Nook from the new icon and come back here.</div>`;
+  if(st==='blocked')return `<div class="muted">${what}</div><div class="muted" style="margin-top:8px">Notifications are blocked for this app. On iPhone open Settings, then Notifications, then Our Nook, and allow them.</div>`;
+  if(st==='on')return `<div class="muted" style="margin-bottom:10px">Notifications are <b>on</b> for this phone. You get: ${what.toLowerCase()}</div><button class="btn px s c-white" data-act="pushoff">Turn off</button>`;
+  return `<div class="muted" style="margin-bottom:10px">${what}</div><button class="btn px s c-gold" data-act="pushon">Turn on notifications</button>`;
+}
+async function pushCheck(){
+  try{
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){S.pushState='unsupported'}
+    else if(Notification.permission==='denied')S.pushState='blocked';
+    else{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();S.pushState=sub&&Notification.permission==='granted'?'on':'off';
+      if(S.pushState==='on'&&SYNC.user)savePush(sub)}
+  }catch(e){S.pushState='unsupported'}
+  if(S.tab==='settings')render();
+}
+function savePush(sub){return SYNC.db.setDoc('shared/push_'+S.me,{j:JSON.stringify({sub:sub.toJSON(),t:Date.now()}),by:S.me,t:Date.now()})}
+async function pushOn(){
+  try{
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)){S.pushState='unsupported';render();return}
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){S.pushState=perm==='denied'?'blocked':'off';render();toast('Notifications were not allowed');return}
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)});
+    await savePush(sub);S.pushState='on';render();toast('Notifications are on');
+  }catch(e){toast('Could not turn on notifications: '+(e&&e.message||e))}
+}
+async function pushOff(){
+  try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();if(sub)await sub.unsubscribe();await SYNC.db.delDoc('shared/push_'+S.me)}catch(e){}
+  S.pushState='off';render();toast('Notifications are off');
+}
 const SYNC={user:null,db:null,loaded:{},last:{},unsubs:[],timer:null,memLast:null,stale:false,errAt:0,denied:0};
 const JS=v=>JSON.stringify(v,(k,x)=>x instanceof Set?undefined:x);
 const LOCAL_KEYS={sc:{pend:{},sel:-1,zoom:false,blank:null,warn:null,swap:null,confirm:false},su:{sel:-1,pencil:false,confirm:false,showErr:false,hist:[]}};
@@ -1767,7 +1844,7 @@ function syncErr(e){
 }
 function softRender(){
   const a=document.activeElement;
-  if((a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||S.adding||S.madd||S.eadd||S.gadd||S.tab==='tetris'||S.tab==='customize'){SYNC.stale=true;return}
+  if((a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||S.adding||S.madd||S.eadd||S.gadd||S.ledit!=null||S.evedit!=null||S.tab==='tetris'||S.tab==='customize'){SYNC.stale=true;return}
   SYNC.stale=false;render();
 }
 document.addEventListener('focusout',()=>{if(SYNC.stale)setTimeout(()=>{if(SYNC.stale)softRender()},120)});
@@ -1855,7 +1932,7 @@ function boot(db){
     const k=EMAILS[(u.email||'').toLowerCase()];
     if(!k||!u.verified){SYNC.user=null;gate('denied',u.email);return}
     SYNC.user=u;S.me=k;
-    gate(null);startWatch();render();
+    gate(null);startWatch();render();pushCheck();
   });
 }
 gate('loading');
