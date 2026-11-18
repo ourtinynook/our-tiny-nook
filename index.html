@@ -245,6 +245,8 @@ mark{background:#F6C453;color:var(--text);padding:0 2px}
 .preview{min-height:24px;text-align:center;margin-bottom:10px}
 
 /* shop */
+.seg4m{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+.seg4m button{font-size:12px!important;padding:0 1px!important;min-height:44px!important}
 .seg4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .seg4 button{min-height:38px;font-size:13px;padding:0 2px;font-weight:500}
 .seg4 button.on{font-weight:700;--edge:#3E2619}
@@ -595,8 +597,8 @@ const S={song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'grocer
   gadd:false,gkind:'travel',cdel:null,gdel:null,nid:100
 };
 /* money is private: each person only ever sees their own */
-S.M={a:{exp:[],goals:[],sav:[]},b:{exp:[],goals:[],sav:[]}};
-['exp','goals','sav'].forEach(k=>Object.defineProperty(S,k,{get(){return S.M[S.me][k]},set(v){S.M[S.me][k]=v},enumerable:true}));
+S.M={a:{exp:[],goals:[],sav:[],inc:[]},b:{exp:[],goals:[],sav:[],inc:[]}};
+['exp','goals','sav','inc'].forEach(k=>Object.defineProperty(S,k,{get(){return S.M[S.me][k]},set(v){S.M[S.me][k]=v},enumerable:true}));
 const me=()=>S.me, other=()=>P[S.me].other;
 const col=k=>k==='a'?'c-coral':'c-sky';
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2000)}
@@ -897,10 +899,11 @@ function dayLabel(iso){const [y,m,d]=iso.split('-').map(Number),dt=new Date(y,m-
 function txHtml(){
   const f=S.txf||'all',tx=[];
   S.exp.forEach(e=>tx.push({key:'e'+e.id,date:e.date,t:e.title,s:CATS[e.cat][0],amt:-e.amt,kind:'spend',c:CATS[e.cat][1]}));
+  (S.inc||[]).forEach(i=>tx.push({key:'i'+i.id,date:i.date,t:i.title,s:i.rep?'Income · monthly':'Income',amt:i.amt,kind:'inc',c:'#7BC67B'}));
   S.sav.forEach(x=>tx.push({key:'s'+x.id,date:x.date,t:(x.amt>0?'Added to ':'Taken out of ')+x.name,s:'Savings',amt:x.amt,kind:'save',c:'#F6C453'}));
   const list=tx.filter(x=>f==='all'||x.kind===f).sort((a,b)=>b.date.localeCompare(a.date)||b.key.localeCompare(a.key,'en',{numeric:true}));
   const days=[];list.forEach(x=>{let d=days.find(z=>z.date===x.date);if(!d){d={date:x.date,items:[]};days.push(d)}d.items.push(x)});
-  const chips=[['all','All'],['spend','Spending'],['save','Savings']].map(([k,l])=>`<button class="chip px s ${f===k?'on g':'c-white'}" data-act="txf" data-v="${k}">${l}</button>`).join('');
+  const chips=[['all','All'],['spend','Spending'],['inc','Income'],['save','Savings']].map(([k,l])=>`<button class="chip px s ${f===k?'on g':'c-white'}" data-act="txf" data-v="${k}">${l}</button>`).join('');
   const body=days.map(d=>{
     const out=d.items.filter(x=>x.kind==='spend').reduce((s,x)=>s+x.amt,0);
     return `<div class="dayh"><span>${dayLabel(d.date)}</span><span class="muted">${out?fmtSigned(out):''}</span></div>${d.items.map(x=>`<div class="txrow"><span class="sw" style="background:${x.c}"></span><div class="grow"><div style="font-weight:700;overflow-wrap:anywhere">${esc(x.t)}</div><div class="muted" style="font-size:14px">${esc(x.s)}</div></div><div class="amt" style="color:${x.amt>0?'#2E7D4F':'var(--text)'}">${fmtSigned(x.amt)}</div></div>`).join('')}`;
@@ -910,7 +913,36 @@ function txHtml(){
     ${list.length?body:'<div class="muted">Nothing here yet. Add an expense or put money into a savings goal.</div>'}
     <div class="muted" style="font-size:14px;margin-top:14px">The amount on each date is what you spent that day. To delete an expense, open the Spending tab.</div></section>`;
 }
-V.money=()=>`<div class="priv px s c-white">${spr(SP.lock||SP.star,2)}<span>Private to ${esc(P[me()].name)}. ${esc(P[other()].name)} cannot see this tab.</span></div><div class="seg">${[['spend','Spending'],['save','Savings'],['tx','Transactions']].map(([k,l])=>`<button class="px s ${S.mtab===k?'on '+({spend:'c-coral',save:'c-leaf',tx:'c-sky'}[k]):'c-white'}" data-act="mtab" data-v="${k}">${l}</button>`).join('')}</div>${S.mtab==='save'?savingsHtml():S.mtab==='tx'?txHtml():spendHtml()}`;
+V.money=()=>`<div class="priv px s c-white">${spr(SP.lock||SP.star,2)}<span>Private to ${esc(P[me()].name)}. ${esc(P[other()].name)} cannot see this tab.</span></div><div class="seg seg4m">${[['spend','Spending'],['inc','Income'],['save','Savings'],['tx','History']].map(([k,l])=>`<button class="px s ${S.mtab===k?'on '+({spend:'c-coral',inc:'c-gold',save:'c-leaf',tx:'c-sky'}[k]):'c-white'}" data-act="mtab" data-v="${k}">${l}</button>`).join('')}</div>${S.mtab==='save'?savingsHtml():S.mtab==='tx'?txHtml():S.mtab==='inc'?incHtml():spendHtml()}${monthSummary()}`;
+function incIn(ym){return (S.inc||[]).filter(i=>i.date.startsWith(ym)||(i.rep&&i.date.slice(0,7)<=ym))}
+function monthSummary(){
+  const ym=todayIso().slice(0,7),name=new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const inc=sumAmt(incIn(ym)),out=sumAmt(S.exp.filter(e=>e.date.startsWith(ym))),left=inc-out;
+  const pct=inc>0?Math.min(100,Math.round(out/inc*100)):(out>0?100:0);
+  return `<section class="card px"><p class="eyebrow">${FL(2)}Monthly summary · ${name}</p>
+    <div class="row" style="justify-content:space-between"><span class="muted">Income</span><b style="color:#2E7D4F">+${money(inc)}</b></div>
+    <div class="row" style="justify-content:space-between;margin-top:6px"><span class="muted">Spent</span><b>-${money(out)}</b></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px;padding-top:10px;border-top:2px dashed #0002"><b>Left over</b><b class="stat" style="font-size:26px;color:${left<0?'#C0483F':'#2E7D4F'}">${left<0?'-':''}${money(Math.abs(left))}</b></div>
+    <span class="blocks" style="margin:10px 0 4px">${tenBlocks(Math.round(pct/10))}</span>
+    <div class="muted" style="font-size:14px">${inc>0?`You have used ${pct}% of this month's income.`:'Add your income in the Income tab to see what is left.'}</div></section>`;
+}
+function incHtml(){
+  const ym=todayIso().slice(0,7),monthName=new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const list=incIn(ym).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id),total=sumAmt(list);
+  const summary=`<section class="card px"><p class="eyebrow">${FL(2)}Income in ${monthName}</p><div class="stat" style="color:#2E7D4F">+${money(total)}</div><div class="muted" style="margin-top:6px">${list.length} entr${list.length===1?'y':'ies'} this month. Only you can see these.</div></section>`;
+  const form=S.iadd?`<section class="card px"><p class="eyebrow">${FL(2)}New income</p>
+    <form class="form" id="incform">
+      <label class="fld" for="incamt"><span>How much? (B$)</span><input class="pxin px s" id="incamt" type="number" inputmode="decimal" step="0.01" min="0.01" placeholder="0.00" required></label>
+      <label class="fld" for="inctitle"><span>Where from?</span><input class="pxin px s" id="inctitle" type="text" placeholder="Salary" required></label>
+      <label class="fld" for="incdate"><span>Date</span><input class="pxin px s" id="incdate" type="date" value="${todayIso()}" required></label>
+      <label class="row" style="gap:10px;font-weight:700"><input id="increp" type="checkbox" style="width:22px;height:22px"> Repeats every month</label>
+      <button class="btn px s me-${me()}" type="submit">Save income</button>
+      <button class="btn px s c-white" type="button" data-act="icancel">Cancel</button>
+    </form></section>`
+  :`<button class="btn px s me-${me()}" data-act="iadd" style="align-self:flex-start">Add income</button>`;
+  const rows=list.map(i=>`<div class="expw"><div class="exp"><span class="sw" style="background:#7BC67B"></span><div class="grow"><div style="font-weight:700;overflow-wrap:anywhere">${esc(i.title)}</div><div class="muted" style="font-size:14px">${i.rep?'Every month · from ':''}${fmtDate(i.date)}</div></div><div class="amt" style="color:#2E7D4F">+${money(i.amt)}</div><button class="x" data-act="idel" data-v="${i.id}" aria-label="Delete ${esc(i.title)}">×</button></div>${S.idl===i.id?`<div class="ents" style="margin:0 0 8px"><span class="muted">${i.rep?'Delete this and all its monthly repeats?':'Delete this income?'}</span><span class="row"><button class="btn px s c-coral" style="min-height:40px;padding:0 14px" data-act="idelyes" data-v="${i.id}">Delete</button><button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="idelno">Keep</button></span></div>`:''}</div>`).join('');
+  return summary+form+`<section class="card px"><p class="eyebrow">${FL(2)}Income list</p>${list.length?rows:'<div class="muted">No income this month yet. Add your first one above.</div>'}</section>`;
+}
 
 function repHtml(m){
   const reps=m.replies||[];
@@ -1008,7 +1040,12 @@ document.addEventListener('click',e=>{
   else if(a==='restno'){S.rconf=false}
   else if(a==='restyes'){if(restoreBackup(S.rtxt)){S.rtxt='';toast('Backup restored')}else{toast('That backup could not be read. Paste the full text.')}S.rconf=false}
   else if(a==='txf'){S.txf=v}
-  else if(a==='mtab'){S.mtab=v;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null}
+  else if(a==='iadd'){S.iadd=true}
+  else if(a==='icancel'){S.iadd=false}
+  else if(a==='idel'){S.idl=+v}
+  else if(a==='idelno'){S.idl=null}
+  else if(a==='idelyes'){S.inc=S.inc.filter(x=>x.id!==+v);S.idl=null;toast('Income deleted')}
+  else if(a==='mtab'){S.iadd=false;S.idl=null;S.mtab=v;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null}
   else if(a==='eadd'){S.eadd=true}
   else if(a==='ecancel'){S.eadd=false}
   else if(a==='edel'){S.cdel=+v}
@@ -1070,6 +1107,10 @@ document.addEventListener('submit',e=>{
     const title=$('#memtitle').value.trim();if(!title)return;
     S.mems.push({id:uid2(),date:$('#memdate').value||todayIso(),title,text:$('#memtext').value.trim(),fav:false,photo:S.mphoto});
     S.madd=false;S.mphoto=null;render();toast('Memory added to your timeline');earn(10,'Memory added');
+  }else if(id==='incform'){
+    const amt=parseFloat($('#incamt').value),title=$('#inctitle').value.trim();if(!(amt>0)||!title)return;
+    S.inc.push({id:uid2(),amt:Math.round(amt*100)/100,title,date:$('#incdate').value||todayIso(),rep:$('#increp').checked});
+    S.iadd=false;render();toast('Income saved');
   }else if(id==='expform'){
     const amt=parseFloat($('#expamt').value),title=$('#exptitle').value.trim();if(!(amt>0)||!title)return;
     S.exp.push({id:uid2(),amt:Math.round(amt*100)/100,title,cat:$('#expcat').value,who:me(),date:$('#expdate').value||todayIso()});
@@ -1749,11 +1790,11 @@ V.customize=()=>`<section class="card px"><p class="eyebrow">${FL(2)}Our app</p>
 V.search=()=>`<section class="card px"><div class="row" style="margin-bottom:12px"><label class="fld grow" for="q"><span>Search everything</span><input class="pxin px s" id="q" type="search" placeholder="dinner, lamp, wedding" value="${esc(S.q||'')}" autocomplete="off"></label></div><div id="results">${resultsHtml()}</div></section>
   <button class="btn px s c-white" data-act="tab" data-v="${S.back||'home'}" style="align-self:flex-start">Back</button>`;
 
-const backupObj=()=>({app:'Our Nook',version:1,saved:new Date().toISOString(),names:{a:P.a.name,b:P.b.name},appName:S.appName,chars:S.chars,coins:S.coins,own:S.own,gs:S.gs,mood:S.mood,events:S.events,lists:S.lists,mems:S.mems,exp:S.exp,goals:S.goals,sav:S.sav});
+const backupObj=()=>({app:'Our Nook',version:1,saved:new Date().toISOString(),names:{a:P.a.name,b:P.b.name},appName:S.appName,chars:S.chars,coins:S.coins,own:S.own,gs:S.gs,mood:S.mood,events:S.events,lists:S.lists,mems:S.mems,exp:S.exp,goals:S.goals,sav:S.sav,inc:S.inc});
 function restoreBackup(txt){
   try{
     const d=JSON.parse(txt);if(!d||d.app!=='Our Nook')return false;
-    ['events','mems','exp','goals','sav'].forEach(k=>{if(Array.isArray(d[k]))S[k]=d[k]});
+    ['events','mems','exp','goals','sav','inc'].forEach(k=>{if(Array.isArray(d[k]))S[k]=d[k]});
     if(d.lists&&typeof d.lists==='object')S.lists=d.lists;
     if(d.mood&&typeof d.mood==='object')S.mood=d.mood;
     if(d.chars&&d.chars.a&&d.chars.b)S.chars=d.chars;
@@ -1863,8 +1904,8 @@ const SLICES={
   profile:{path:()=>'shared/profile',out:()=>({names:{a:P.a.name,b:P.b.name},appName:S.appName,chars:S.chars}),
     inn:v=>{if(!v)return;if(v.names){P.a.name=v.names.a||P.a.name;P.b.name=v.names.b||P.b.name}if(v.appName)S.appName=v.appName;if(v.chars&&v.chars.a&&v.chars.b)S.chars=v.chars}},
   games:{path:()=>'shared/games',out:gamesOut,inn:gamesIn},
-  money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav}),
-    inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[]}}}
+  money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav,inc:S.M[S.me].inc}),
+    inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[],inc:v.inc||[]}}}
 };
 ['a','b'].forEach(k=>{SLICES['person_'+k]={mine:k,path:()=>'shared/person_'+k,
   out:()=>({coins:S.coins[k],own:S.own[k],cl:S.cl.filter(x=>x.k===k).slice(0,30),mood:S.mood[k]||'',moodDay:S.moodDay[k]||'',thinkDay:S.thinkDay[k]||'',thinkTs:S.thinkTs[k]||0}),
