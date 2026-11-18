@@ -425,6 +425,47 @@ mark{background:#F6C453;color:var(--text);padding:0 2px}
 .gcard h2{margin:0;font-size:26px}.gcard p{margin:0}
 .gart{display:flex;gap:8px;justify-content:center}
 .gerr{color:#B3402F;font-size:14px;overflow-wrap:anywhere}.gtip{font-size:13px}
+
+
+/* Date quests: a storybook look */
+.qw .card{--fill:#FFF1D0;--hi:#FFFAE6;--lo:#E8CC96}
+.qw .eyebrow{color:#6B4C8A}
+.qsky{position:relative;overflow:hidden;background:linear-gradient(180deg,#3B2F63 0%,#6A58A0 55%,#E8A0A8 100%);padding:14px 14px 0}
+.qsky .st{position:absolute;z-index:0;width:6px;height:6px;background:#FFE9A8;box-shadow:6px 0 #FFE9A8,-6px 0 #FFE9A8,0 6px #FFE9A8,0 -6px #FFE9A8;animation:qtw 2.6s ease-in-out infinite}
+.qsky .moon{position:absolute;right:16px;top:12px;width:34px;height:34px;border-radius:50%;background:#FFE9A8;box-shadow:inset -9px -3px 0 #E7C46E}
+.qhill{position:relative;height:34px;background:#7BC67B;box-shadow:inset 0 6px 0 #5BAE5E;margin:0 -14px}
+.qhero-t{position:relative;font-size:26px;font-weight:700;line-height:1.05;color:#FFE9A8;text-shadow:3px 3px 0 #2A1F4A;max-width:70%}
+.qbub{position:relative;background:#FFFDF5;color:#5B3A29;padding:8px 12px;margin:12px 0 0;font-size:14px;line-height:1.3;box-shadow:0 0 0 3px #5B3A29}
+.qbub:after{content:"";position:absolute;bottom:-12px;left:34px;border:7px solid transparent;border-top:9px solid #5B3A29}
+.qchars{display:flex;justify-content:center;align-items:flex-end;gap:26px;margin-top:20px;margin-bottom:-8px;position:relative;z-index:1}
+.qchars>div:first-child{animation:qhop 2.4s ease-in-out infinite}.qchars>div:last-child{animation:qhop 2.4s ease-in-out .9s infinite}
+.qgal{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 6px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.qfr{position:relative;flex:none;width:min(78%,260px);aspect-ratio:4/3;scroll-snap-align:center;padding:4px;box-sizing:border-box}
+.qfr img{width:100%;height:100%;object-fit:cover;display:block}
+.qx{position:absolute;right:8px;top:8px;min-width:32px;height:32px;padding:0 6px;background:#FFFDF5;border:2px solid #5B3A29;font:inherit;font-weight:700;color:#5B3A29;cursor:pointer}
+.qw{display:flex;flex-direction:column;gap:22px}
+.qw>.card{padding:20px 18px}
+.qw .eyebrow{margin-bottom:16px}
+.qrow{padding:18px 0;border-top:2px dotted rgba(91,58,41,.28)}
+.qw .eyebrow+.qrow,.qw .chips+.qrow{border-top:0;padding-top:4px}
+.qrow:last-child{padding-bottom:0}
+.qt{font-size:17px;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.qsub{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin-top:6px}
+.qline{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.qline>div:first-child{min-width:0;flex:1}
+.qlinks{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:14px}
+.qlinks .link,.qlinks label.link{min-height:32px;display:inline-flex;align-items:center;white-space:nowrap;font-size:14px;cursor:pointer;background:none;border:0;padding:0;font-family:inherit;color:inherit;text-decoration:underline dotted;text-underline-offset:4px}
+.qw .chips{gap:12px;margin:0 0 14px}
+.qw .qgal{margin-top:14px}
+.qgal.one .qfr{width:100%}
+.qpoint{animation:qbob 1.1s ease-in-out infinite}
+.qchest{display:inline-block;animation:qwig 1.8s ease-in-out infinite;transform-origin:50% 100%}
+.qspark{position:absolute;width:8px;height:8px;background:#F6C453;box-shadow:4px 0 #F6C453,-4px 0 #F6C453,0 4px #F6C453,0 -4px #F6C453;animation:qtw 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes qtw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+@keyframes qhop{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-10px)}90%{transform:translateY(0)}}
+@keyframes qbob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes qwig{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-6deg)}84%{transform:rotate(6deg)}92%{transform:rotate(-3deg)}}
+@media (prefers-reduced-motion:reduce){.qsky .st,.qchars>div,.qpoint,.qchest,.qspark{animation:none!important}}
 </style>
 </head><body>
 
@@ -585,12 +626,12 @@ const TITLES={home:'Our Nook',plan:'Plan',lists:'Lists',notes:'Notes',memories:'
 
 /* ---------- sample data (nothing is saved anywhere) ---------- */
 const isoOff=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString('en-CA')};
-const S={q:{done:[],act:[],mine:[]},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
+const S={qall:false,mpe:null,qpe:null,qph:[],qphc:null,qwdeg:0,qprize:null,q:{done:[],act:[],mine:[],chests:0},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
   mood:{a:'',b:''},
   events:[],
   lists:{groceries:[],todo:[],bucket:[]},
   notes:[],
-  mems:[],madd:false,mphoto:null,confirm:null,nextId:5,
+  mems:[],madd:false,mphoto:null,mphotos:[],mphc:null,confirm:null,nextId:5,
   mtab:'spend',txf:'all',appName:'Our Nook',
   chars:{a:{animal:'bunny',fur:'cream',hat:'none',outfit:'sweater',oc:'coral',glasses:'none'},b:{animal:'bear',fur:'brown',hat:'beanie',outfit:'scarf',oc:'sky',glasses:'none'}},
   coins:{a:30,b:30},own:{a:['outfit:sweater'],b:['hat:beanie','outfit:scarf']},cl:[],moodDay:{},thinkDay:{},thinkTs:{a:0,b:0},shopTab:'hat',eadd:false,
@@ -616,8 +657,15 @@ const SCENES={
  cake:['#D9C7F0',[[0,16,32,4,'#B07A4F'],[8,10,16,6,'#FFC2D1'],[8,10,16,1,'#FFFFFF'],[8,13,16,1,'#FFFFFF'],[11,7,10,3,'#FFFDF5'],[12,4,1,3,'#F6C453'],[15,4,1,3,'#8EC9F0'],[19,4,1,3,'#7BC67B'],[12,3,1,1,'#F4978E'],[15,3,1,1,'#F4978E'],[19,3,1,1,'#F4978E'],[2,3,3,3,'#F6C453'],[27,5,3,3,'#8EC9F0'],[3,9,2,2,'#F4978E']]]
 };
 function sceneSvg(k){const s=SCENES[k];if(!s)return '';return `<svg viewBox="0 0 32 20" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" role="img" aria-label="Pixel picture"><rect width="32" height="20" fill="${s[0]}"/>${s[1].map(([x,y,w,h,c])=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`).join('')}</svg>`}
-function photoHtml(m){
-  const inner=m.photo?`<img src="${m.photo}" alt="Photo for ${esc(m.title)}">`:sceneSvg(m.scene);
+const memPhotos=m=>Array.isArray(m.photos)&&m.photos.length?m.photos:(m.photo?[m.photo]:[]);
+function memGal(m,ph,rm){
+  return `<div class="qgal${ph.length===1?' one':''}" tabindex="0" aria-label="Photos, swipe sideways">${ph.map((u,i)=>`<div class="qfr px s c-white"><img src="${u}" alt="Photo ${i+1} for ${esc(m.title||'memory')}" loading="lazy">${rm?`<button class="qx" type="button" data-act="${rm}" data-v="${m.id}|${i}" aria-label="Remove photo">${S.mphc===m.id+'|'+i?'Remove?':'×'}</button>`:''}</div>`).join('')}</div>${ph.length>1?'<div class="muted" style="font-size:12px;text-align:center;margin-top:-6px">Swipe sideways for more</div>':''}`;
+}
+function photoHtml(m,mini){
+  const ph=memPhotos(m);
+  if(mini&&ph.length)return `<div class="photo px s c-white"><div class="ph"><img src="${ph[0]}" alt="Photo for ${esc(m.title)}"></div></div>`;
+  if(ph.length)return memGal(m,ph,S.mpe===String(m.id)?'mphdel':null);
+  const inner=sceneSvg(m.scene);
   return inner?`<div class="photo px s c-white"><div class="ph">${inner}</div></div>`:'';
 }
 const fmtDate=iso=>{const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
@@ -627,6 +675,8 @@ const todayIso=()=>new Date().toLocaleDateString('en-CA');
 const CATS={food:['Food','#F4978E'],home:['Home','#F6C453'],ride:['Transport','#8EC9F0'],fun:['Fun','#D9C7F0'],bills:['Bills','#7BC67B'],other:['Other','#EAD3A2']};
 const KINDS={travel:['Travel','Travel fund'],wedding:['Wedding','Wedding'],down:['Down payment','Down payment'],other:['Other','']};
 SP.money=["...kkkkkk...","..kyyyyyyk..",".kyyYYYYyyk.",".kyYyyyyYyk.",".kyYyyyyYyk.",".kyYyyyyYyk.",".kyyYYYYyyk.","..kyyyyyyk..","...kkkkkk..."];
+SP.chest=["..kkkkkkkk..",".knnnnnnnnk.","knnnnnnnnnnk","knnnnnnnnnnk","kkkkkyykkkkk","knnnnyYnnnnk","knnnnnnnnnnk","knnnnnnnnnnk","knnnnnnnnnnk","kkkkkkkkkkkk"];
+SP.chestOpen=["..y..yy..y..","...y.yyy.y..","kkkkkkkkkkkk","kyyyyyyyyyyk","kyyyyyyyyyyk","kkkkkYYkkkkk","knnnnYYnnnnk","knnnnnnnnnnk","knnnnnnnnnnk","kkkkkkkkkkkk"];
 SP.suitcase=mirror(["...kkk","...k..","kkkkkk","kccccc","kccccc","kyyyyy","kccccc","kccccc","kkkkkk"]);
 SP.ring=mirror(["....kb","...kbb","....kk","..kkkk",".kyyyy","kyy...","ky....","ky....","kyy...",".kyyyy","..kkkk"]);
 const money=n=>{const v=Math.round(Number(n)*100)/100;return 'B$'+v.toLocaleString('en-GB',{minimumFractionDigits:Number.isInteger(v)?0:2,maximumFractionDigits:2})};
@@ -689,40 +739,111 @@ function songCard(){
 }
 
 const QSTART=[
-['At home','Cook a new recipe together','home'],['At home','Build a blanket fort and watch a film inside it','home'],['At home','Have a home spa night with face masks','home'],['At home','Bake something from scratch','home'],['At home','Play a board game with a small bet on the loser','home'],['At home','Cook each other\'s favourite dish','home'],['At home','Make a playlist of songs that remind you of each other','home'],['At home','Write each other a short letter and read it out loud','home'],['At home','Look through old photos together','home'],['At home','Do a jigsaw puzzle together','home'],
-['Outdoors','Watch the sunset somewhere new','out'],['Outdoors','Take a long walk with no plan and no phone','out'],['Outdoors','Visit a beach or river','out'],['Outdoors','Go on a picnic','out'],['Outdoors','Try a hike or a nature trail','out'],['Outdoors','Go stargazing','out'],['Outdoors','Visit a night market and try three new snacks','out'],['Outdoors','Rent bikes and ride around','out'],
-['Cheap','Share one dessert from a place neither of you has tried','cheap'],['Cheap','Try a new cafe','cheap'],['Cheap','Take photos of each other around town','cheap'],['Cheap','Have a drive with no destination','cheap'],['Cheap','Walk through a bookshop and pick a book for each other','cheap'],['Cheap','Learn a few words in a new language together','cheap'],
-['Special','Dress up and have a fancy dinner','special'],['Special','Go on a day trip somewhere new','special'],['Special','Book a class together, like pottery or cooking','special'],['Special','Plan a surprise for your partner','special'],['Special','Stay one night somewhere different','special'],['Special','Recreate your first date','special']
+['At home','Brew a delicious potion together (cook a new recipe)','home'],['At home','Build a blanket castle and hold a film night inside it','home'],['At home','Open a tiny spa: face masks, soft music, no phones','home'],['At home','Bake something from scratch and name it after yourselves','home'],['At home','Play a board game where the loser pays a silly forfeit','home'],['At home','Cook each other\'s favourite dish like a royal feast','home'],['At home','Make a playlist of songs that remind you of each other','home'],['At home','Write each other a love scroll and read it out loud','home'],['At home','Open the treasure box of old photos and tell the stories','home'],['At home','Piece together a jigsaw puzzle, one tiny kingdom at a time','home'],['Outdoors','Chase a sunset somewhere you have never watched one','out'],['Outdoors','Wander with no map and no phones, and see where the path goes','out'],['Outdoors','Visit the sea or a river and skip a stone each','out'],['Outdoors','Hold a picnic fit for woodland creatures','out'],['Outdoors','Follow a nature trail and find the prettiest tree','out'],['Outdoors','Lie back and count the stars until one of you loses count','out'],['Outdoors','Raid a night market and taste three new snacks','out'],['Outdoors','Hop on bikes and explore a new corner of the kingdom','out'],['Cheap','Share one dessert from a place neither of you has tried','cheap'],['Cheap','Discover a new cosy cafe and vote on its best drink','cheap'],['Cheap','Be each other\'s photographer for a whole afternoon','cheap'],['Cheap','Take a drive with no destination and one good song','cheap'],['Cheap','Pick out a book for each other in a bookshop','cheap'],['Cheap','Learn five words of a new language to whisper to each other','cheap'],['Special','Dress up like royalty and have a fancy dinner','special'],['Special','Go on a day trip to somewhere neither of you has seen','special'],['Special','Join a class together, like pottery or cooking','special'],['Special','Plan a secret surprise for your partner','special'],['Special','Spend a night somewhere new, like a little inn','special'],['Special','Recreate the magic of your very first date','special']
 ].map((x,i)=>({id:'q'+i,t:x[1],k:x[2]}));
-const QKINDS={all:'All',home:'At home',out:'Outdoors',cheap:'Cheap',special:'Special'};
+const QKINDS={all:'All',home:'Cosy',out:'Wild',cheap:'Thrifty',special:'Grand'};
 const QBADGES=[[1,'First quest'],[5,'Quest pair'],[10,'Adventurers'],[25,'Quest masters']];
 const qAll=()=>QSTART.concat(S.q.mine);
 function qAvail(){const used=new Set(S.q.done.map(x=>x.id).concat(S.q.act.map(x=>x.id)));return qAll().filter(x=>!used.has(x.id)&&(S.qf==='all'||x.k===S.qf))}
+const QLV=[[0,'Tiny Sprouts'],[2,'Wandering Sparrows'],[5,'Moonlit Explorers'],[10,'Brave Adventurers'],[15,'Dream Weavers'],[25,'Legends of the Nook']];
+const QKIND_COL={home:'#F4978E',out:'#7BC67B',cheap:'#F6C453',special:'#D9C7F0'};
+const QORDER=['home','out','cheap','special'];
+const qKindN=k=>S.q.done.filter(x=>x.k===k).length;
+const QBADGE=[['First tale','1 quest',()=>S.q.done.length>=1,'star'],['Hearth keepers','3 cosy',()=>qKindN('home')>=3,'home'],['Sunset chasers','3 wild',()=>qKindN('out')>=3,'flower'],['Penny wizards','3 thrifty',()=>qKindN('cheap')>=3,'money'],['Grand nights','2 grand',()=>qKindN('special')>=2,'ring'],['Quest duo','5 quests',()=>S.q.done.length>=5,'star'],['Voyagers','10 quests',()=>S.q.done.length>=10,'suitcase'],['Guild legends','25 quests',()=>S.q.done.length>=25,'star']];
+let QSPIN=false;
+function qAvailAll(){const used=new Set(S.q.done.map(x=>x.id).concat(S.q.act.map(x=>x.id)));return qAll().filter(x=>!used.has(x.id))}
+function wheelSvg(){
+  const C=110,R=96,pt=(a,r)=>[(C+r*Math.sin(a*Math.PI/180)).toFixed(2),(C-r*Math.cos(a*Math.PI/180)).toFixed(2)];
+  let out='';
+  QORDER.forEach((k,i)=>{const a0=i*90,a1=a0+90,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R),m=a0+45,[tx,ty]=pt(m,62),rot=m<180?m-90:m+90;
+    out+=`<path d="M${C} ${C}L${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}Z" fill="${QKIND_COL[k]}" stroke="#5B3A29" stroke-width="4" stroke-linejoin="round"/><text x="${tx}" y="${ty}" transform="rotate(${rot} ${tx} ${ty})" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="#5B3A29">${QKINDS[k]}</text>`});
+  out+=`<circle cx="${C}" cy="${C}" r="17" fill="#F6C453" stroke="#5B3A29" stroke-width="4"/><path d="M110 100l3 7 7 .6-5.3 4.7 1.7 7-6.4-3.8-6.4 3.8 1.7-7-5.3-4.7 7-.6z" fill="#FFFDF5"/>`;
+  return `<svg viewBox="-10 -10 240 240" width="240" height="240" style="max-width:100%;display:block" role="img" aria-label="Quest wheel"><circle cx="110" cy="110" r="106" fill="#6A58A0" stroke="#5B3A29" stroke-width="4"/><circle cx="110" cy="110" r="106" fill="none" stroke="#FFE9A8" stroke-width="5" stroke-dasharray="2 12" stroke-linecap="square"/>${out}</svg>`;
+}
+
+const qPhotos=qid=>S.qph.filter(x=>x.qid===qid);
+function qGallery(qid){
+  const ph=qPhotos(qid);if(!ph.length)return '';
+  const ed=S.qpe===String(qid);
+  return `<div class="qgal" tabindex="0" aria-label="Quest photos, swipe sideways">${ph.map(x=>`<div class="qfr px s c-white"><img src="${x.photo}" alt="Quest photo" loading="lazy">${ed?`<button class="qx" data-act="qphdel" data-v="${x.id}" aria-label="Remove photo">${S.qphc===x.id?'Remove?':'×'}</button>`:''}</div>`).join('')}</div>${ph.length>1?'<div class="muted" style="font-size:12px;text-align:center;margin-top:-6px">Swipe sideways for more</div>':''}<div style="margin:6px 0 0"><button class="link" data-act="qpe" data-v="${qid}">${ed?'Done editing photos':'Edit photos'}</button></div>`;
+}
+function qAddLink(qid){return `<input class="sr" type="file" id="qf-${qid}" data-qid="${qid}" accept="image/*" multiple><label class="link" for="qf-${qid}">Add photos</label>`}
+function qAddBtn(qid){return `<input class="sr" type="file" id="qf-${qid}" data-qid="${qid}" accept="image/*" multiple><label class="btn px s c-white" for="qf-${qid}" style="min-height:40px;padding:0 14px;display:inline-flex;align-items:center">Add photos</label>`}
+function shrinkImg(f){return new Promise((ok,no)=>{const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{const k=Math.min(1,800/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',.75))};img.onerror=()=>{URL.revokeObjectURL(url);no(new Error('bad'))};img.src=url})}
+document.addEventListener('change',async e=>{
+  const t=e.target;if(!t||!t.dataset||!t.dataset.qid)return;
+  const qid=t.dataset.qid,files=[...(t.files||[])];t.value='';
+  const room=8-qPhotos(qid).length;if(room<=0){toast('That is plenty of photos for one quest');return}
+  if(files.length)toast('Adding photos...');
+  const added=[];
+  for(const f of files.slice(0,room)){try{const d=await shrinkImg(f);S.qph.push({id:uid2(),qid,photo:d});added.push(d)}catch(err){toast('That file could not be opened as a picture.')}}
+  const lm=S.mems.find(m=>m.qid===qid);
+  if(lm&&added.length){const cur=memPhotos(lm).slice();added.forEach(d=>{if(cur.length<5&&JSON.stringify(cur).length+d.length<850000)cur.push(d)});lm.photos=cur;lm.photo=cur[0]||null}
+  render();queueSync();
+});
+const QSAY=['Psst... a new adventure is waiting for the two of you.','The wheel is feeling lucky today.','Quests are always better with snacks.','Dragons optional. Hand-holding required.','Every quest is a story you will tell later.','A little magic hides in an ordinary evening.','Adventure begins the moment you tap.'];
 V.quests=()=>{
   const n=S.q.done.length,avail=qAvail();
-  const badges=QBADGES.map(([c,l])=>`<span class="date px s ${n>=c?'c-gold':'c-white'}" style="opacity:${n>=c?1:.55}">${n>=c?'★ ':''}${l} (${c})</span>`).join(' ');
-  const head=`<section class="card px"><p class="eyebrow">${FL(2)}Quest board</p><div class="stat">${n}</div><div class="muted">date ${n===1?'quest':'quests'} finished together</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-top:12px">${badges}</div></section>`;
+  const chestReady=Math.floor(n/5)-(S.q.chests||0)>0;
+  const say=chestReady?'A treasure chest is waiting for you! Open it below!':S.q.act.length?'You have a quest underway. Go and make a memory!':QSAY[new Date().getDate()%QSAY.length];
+  const stars=[[78,16,0],[92,58,.6],[5,160,1.1],[90,150,1.7],[22,176,.3],[72,172,2]].map(([l,t,d])=>`<i class="st" style="left:${l}%;top:${t}px;animation-delay:${d}s"></i>`).join('');
+  const hero=`<section class="px" style="--fill:#4B3B78;--hi:#6A58A0;--lo:#33285A;padding:0;margin-bottom:14px"><div class="qsky">${stars}<i class="moon"></i><div class="qhero-t">The Adventure Board</div><div class="qbub">${say}</div><div class="qchars"><div>${av('a',4)}</div><div>${av('b',4)}</div></div><div class="qhill"></div></div></section>`;
+  let li=0;QLV.forEach((l,i)=>{if(n>=l[0])li=i});
+  const cur=QLV[li],nxt=QLV[li+1],frac=nxt?(n-cur[0])/(nxt[0]-cur[0]):1;
+  const level=`<section class="card px"><p class="eyebrow">${FL(2)}Guild rank</p>
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="muted" style="font-size:14px">Rank ${li+1} of ${QLV.length}</div><div class="stat" style="font-size:28px">${cur[1]}</div></div><div style="text-align:right"><div class="stat">${n}</div><div class="muted" style="font-size:14px">${n===1?'tale':'tales'} written</div></div></div>
+    <span class="blocks" style="margin:12px 0 4px">${tenBlocks(Math.round(frac*10))}</span>
+    <div class="muted" style="font-size:14px">${nxt?`${nxt[0]-n} more ${nxt[0]-n===1?'quest':'quests'} until you become ${nxt[1]}.`:'You are the Legends of the Nook. The bards sing of you!'}</div></section>`;
+  const chestsAvail=Math.floor(n/5)-(S.q.chests||0);
+  const prize=S.qprize?`<section class="card px"><p class="eyebrow">${FL(2)}Sparkle sparkle!</p><div class="row" style="gap:14px;align-items:center"><span class="qchest">${spr(SP.chestOpen,5)}</span><div><div style="font-size:20px;font-weight:700;overflow-wrap:anywhere">${esc(S.qprize)}</div></div></div><button class="btn px s c-white" style="margin-top:12px" data-act="qprizeok">Hooray!</button></section>`:'';
+  const chest=chestsAvail>0?`<section class="card px"><p class="eyebrow">${FL(2)}A treasure chest appeared!</p><div class="row" style="gap:14px;align-items:center"><span class="qchest">${spr(SP.chest,5)}</span><div><div style="font-weight:700">${chestsAvail>1?chestsAvail+' chests are':'A chest is'} waiting for you</div><div class="muted" style="font-size:14px">A reward for every 5 quests. What could be inside?</div></div></div><button class="btn px s c-gold" style="margin-top:12px" data-act="qchest">Open the chest</button></section>`
+    :`<section class="card px"><div class="row" style="gap:14px;align-items:center">${spr(SP.chest,3)}<div class="grow"><div style="font-weight:700">The next chest is hiding</div><div class="muted" style="font-size:14px">${5-(n%5)} more ${5-(n%5)===1?'quest':'quests'} and it will appear.</div></div></div></section>`;
+  const wheel=`<section class="card px" style="text-align:center"><p class="eyebrow" style="text-align:left">${FL(2)}The Wheel of Fate</p>
+    <div style="position:relative;width:240px;max-width:100%;margin:14px auto 6px"><i class="qspark" style="left:-6px;top:30px"></i><i class="qspark" style="right:-6px;top:90px;animation-delay:.8s"></i><i class="qspark" style="left:4px;bottom:20px;animation-delay:1.5s"></i><div class="qpoint" style="position:absolute;left:50%;top:-12px;margin-left:-12px;z-index:2;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:22px solid #5B3A29"></div><div id="wheel" style="transform:rotate(${S.qwdeg}deg)">${wheelSvg()}</div></div>
+    <button class="btn px s c-coral" data-act="qspin" style="margin-top:10px">Spin the wheel!</button><div class="muted" style="font-size:14px;margin-top:8px">Can't decide what to do? Let fate pick. Cosy, Wild, Thrifty or Grand.</div></section>`;
   const pick=S.qpick&&qAll().find(x=>x.id===S.qpick);
-  const pickCard=pick?`<section class="card px"><p class="eyebrow">${FL(2)}Your random quest</p><div style="font-size:20px;font-weight:700;margin:6px 0 12px">${esc(pick.t)}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn px s c-leaf" data-act="qtake" data-v="${pick.id}">Take this quest</button><button class="btn px s c-white" data-act="qrand">Another one</button></div></section>`:'';
-  const memCard=S.qmem?`<section class="card px"><p class="eyebrow">${FL(2)}Quest done!</p><div style="font-weight:700;margin:4px 0 10px">${esc(S.qmem.t)}</div><div class="muted" style="margin-bottom:10px">Save it as a memory on your timeline?</div><div class="row" style="gap:8px"><button class="btn px s c-gold" data-act="qmemyes">Save memory</button><button class="btn px s c-white" data-act="qmemno">Not now</button></div></section>`:'';
-  const act=S.q.act.length?`<section class="card px"><p class="eyebrow">${FL(2)}In progress</p>${S.q.act.map(x=>`<div class="expw"><div style="font-weight:700;overflow-wrap:anywhere">${esc(x.t)}</div><div class="row" style="gap:8px;flex-wrap:wrap;margin:8px 0 12px"><button class="btn px s c-leaf" style="min-height:40px;padding:0 14px" data-act="qdone" data-v="${x.id}">Done +5</button><button class="btn px s c-sky" style="min-height:40px;padding:0 14px" data-act="qplan" data-v="${x.id}">${x.planned?'In Plan':'Add to Plan'}</button><button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="qdrop" data-v="${x.id}">Put back</button></div></div>`).join('')}</section>`:'';
-  const chips=`<div class="chips" style="margin:0 0 12px">${Object.entries(QKINDS).map(([k,l])=>`<button class="chip px s ${S.qf===k?'on g':'c-white'}" data-act="qf" data-v="${k}">${l}</button>`).join('')}</div>`;
-  const rows=avail.map(x=>`<div class="exp"><div class="grow"><div style="font-weight:700;overflow-wrap:anywhere">${esc(x.t)}</div><div class="muted" style="font-size:14px">${QKINDS[x.k]}${String(x.id)[0]==='c'?' · yours':''}</div></div><button class="btn px s c-gold" style="min-height:40px;padding:0 14px" data-act="qtake" data-v="${x.id}">Take</button>${String(x.id)[0]==='c'?`<button class="x" data-act="qdel" data-v="${x.id}" aria-label="Delete quest">×</button>`:''}</div>`).join('');
-  const form=S.qadd?`<form class="form" id="qform" style="margin-top:14px"><label class="fld" for="qtext"><span>Your quest</span><input class="pxin px s" id="qtext" type="text" placeholder="Try the new ramen place" required></label><label class="fld" for="qkind"><span>Type</span><select class="pxin px s" id="qkind">${Object.entries(QKINDS).filter(([k])=>k!=='all').map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></label><button class="btn px s me-${me()}" type="submit">Save quest</button><button class="btn px s c-white" type="button" data-act="qcancel">Cancel</button></form>`:`<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn px s c-coral" data-act="qrand">Surprise us</button><button class="btn px s c-white" data-act="qadd">Add your own</button></div>`;
-  const board=`<section class="card px"><p class="eyebrow">${FL(2)}Available quests</p>${chips}${avail.length?rows:'<div class="muted">No quests left here. Add your own or pick another type.</div>'}${form}</section>`;
-  const log=n?`<section class="card px"><p class="eyebrow">${FL(2)}Finished quests</p>${S.q.done.slice().reverse().map(x=>`<div class="exp"><span class="sw" style="background:#F6C453"></span><div class="grow"><div style="font-weight:700;overflow-wrap:anywhere">${esc(x.t)}</div><div class="muted" style="font-size:14px">${fmtDate(x.date)}</div></div></div>`).join('')}</section>`:'';
-  return head+memCard+pickCard+act+board+log;
+  const pickCard=pick?`<section class="card px" id="qpickcard"><p class="eyebrow">${FL(2)}Fate has spoken!</p><div style="font-size:20px;font-weight:700;margin:6px 0 4px;overflow-wrap:anywhere">${esc(pick.t)}</div><div class="muted" style="margin-bottom:12px">${QKINDS[pick.k]}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn px s c-leaf" data-act="qtake" data-v="${pick.id}">Accept the quest!</button><button class="btn px s c-white" data-act="qspin">Spin again</button></div></section>`:'';
+  const shelf=`<section class="card px"><p class="eyebrow">${FL(2)}Trophy shelf</p><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 8px;text-align:center">${QBADGE.map(([nm,how,ok,sp])=>`<div style="${ok()?'':'opacity:.4;filter:grayscale(1)'}"><div style="display:flex;justify-content:center;min-height:36px">${spr(SP[sp],3)}</div><div style="font-size:12px;font-weight:700;margin-top:8px;line-height:1.25;overflow-wrap:anywhere">${nm}</div><div class="muted" style="font-size:11px;line-height:1.25;margin-top:2px">${how}</div></div>`).join('')}</div></section>`;
+  const memCard=S.qmem?`<section class="card px"><p class="eyebrow">${FL(2)}Quest complete!</p><div style="font-weight:700;margin:4px 0 10px">${esc(S.qmem.t)}</div><div class="muted" style="margin-bottom:10px">Add photos as proof, then write this tale into your Memories?</div>${qGallery(S.qmem.id)}<div class="row" style="gap:8px;flex-wrap:wrap">${qAddBtn(S.qmem.id)}<button class="btn px s c-gold" data-act="qmemyes">Save the tale</button><button class="btn px s c-white" data-act="qmemno">Not now</button></div></section>`:'';
+  const act=S.q.act.length?`<section class="card px"><p class="eyebrow">${FL(2)}Quests underway</p>${S.q.act.map(x=>`<div class="qrow"><div class="qt">${esc(x.t)}</div><div class="qsub"><span class="sw" style="background:${QKIND_COL[x.k]};margin:0 2px"></span>${QKINDS[x.k]}</div><div style="margin-top:16px"><button class="btn px s c-leaf" data-act="qdone" data-v="${x.id}">We did it! +5</button></div>${qGallery(x.id)}<div class="qlinks"><button class="link" data-act="qplan" data-v="${x.id}">${x.planned?'In Plan':'Add to Plan'}</button>${qAddLink(x.id)}<button class="link" data-act="qdrop" data-v="${x.id}">Not today</button></div></div>`).join('')}</section>`:'';
+  const chips=`<div class="chips">${Object.entries(QKINDS).map(([k,l])=>`<button class="chip px s ${S.qf===k?'on g':'c-white'}" data-act="qf" data-v="${k}">${l}</button>`).join('')}</div>`;
+  const shown=S.qall?avail:avail.slice(0,6);
+  const rows=shown.map(x=>`<div class="qrow"><div class="qline"><div><div class="qt">${esc(x.t)}</div><div class="qsub"><span class="sw" style="background:${QKIND_COL[x.k]};margin:0 2px"></span>${QKINDS[x.k]}${String(x.id)[0]==='c'?' · yours':''}</div></div><button class="btn px s c-gold" style="flex:none" data-act="qtake" data-v="${x.id}">Accept</button></div>${String(x.id)[0]==='c'?`<div class="qlinks" style="margin-top:10px"><button class="link" data-act="qdel" data-v="${x.id}">Delete this quest</button></div>`:''}</div>`).join('');
+  const more=avail.length>6?`<div style="margin-top:10px;text-align:center"><button class="btn px s c-white" data-act="qall">${S.qall?'Show fewer':'Show all '+avail.length+' quests'}</button></div>`:'';
+  const form=S.qadd?`<form class="form" id="qform" style="margin-top:22px"><label class="fld" for="qtext"><span>Your own quest</span><input class="pxin px s" id="qtext" type="text" placeholder="Try the new ramen place" required></label><label class="fld" for="qkind"><span>Type</span><select class="pxin px s" id="qkind">${QORDER.map(k=>`<option value="${k}">${QKINDS[k]}</option>`).join('')}</select></label><div class="row" style="gap:12px;flex-wrap:wrap"><button class="btn px s me-${me()}" type="submit">Save quest</button><button class="btn px s c-white" type="button" data-act="qcancel">Cancel</button></div></form>`:`<div class="qlinks" style="margin-top:20px"><button class="link" data-act="qadd">+ Write a new quest</button></div>`;
+  const board=`<section class="card px"><p class="eyebrow">${FL(2)}The quest scroll</p>${chips}${avail.length?rows+more:'<div class="muted">This part of the scroll is empty. Write a new quest or try another type.</div>'}${form}</section>`;
+  const log=n?`<section class="card px"><p class="eyebrow">${FL(2)}Tales we have written</p>${S.q.done.slice().reverse().map(x=>`<div class="qrow"><div class="qt">${esc(x.t)}</div><div class="qsub">${fmtDate(x.date)}</div>${qGallery(x.id)}<div class="qlinks">${qAddLink(x.id)}${S.mems.some(m=>m.qid===x.id)?'<span class="muted" style="font-size:15px">Saved in Memories</span>':`<button class="link" data-act="qtalemem" data-v="${x.id}">Save to Memories</button>`}</div></div>`).join('')}</section>`:'';
+  return `<div class="qw">`+hero+level+prize+memCard+(chestsAvail>0?chest:'')+wheel+pickCard+act+(chestsAvail>0?'':chest)+shelf+board+log+`</div>`;
 };
 function qAct(a,v){
   const q=S.q,find=id=>qAll().find(x=>x.id===id);
   if(a==='qf'){S.qf=v;S.qpick=null}
-  else if(a==='qrand'){const l=qAvail();S.qpick=l.length?l[Math.floor(Math.random()*l.length)].id:null;if(!l.length)toast('No quests left here')}
+  else if(a==='qspin'){
+    if(QSPIN)return;const l=qAvailAll();if(!l.length){toast('No quests left. Add your own!');return}
+    const x=l[Math.floor(Math.random()*l.length)],i=QORDER.indexOf(x.k),local=i*90+12+Math.random()*66;
+    let target=Math.floor(S.qwdeg/360)*360+360*5+((360-local)%360);if(target<S.qwdeg+720)target+=360;
+    const el=document.getElementById('wheel'),pc=document.getElementById('qpickcard');if(pc)pc.style.visibility='hidden';
+    QSPIN=true;
+    if(el){el.style.transition='transform 4s cubic-bezier(.17,.67,.2,1)';void el.offsetWidth;el.style.transform='rotate('+target+'deg)'}
+    setTimeout(()=>{QSPIN=false;S.qwdeg=target;S.qpick=x.id;render()},el?4150:0);
+  }
+  else if(a==='qchest'){
+    const avl=Math.floor(S.q.done.length/5)-(S.q.chests||0);if(avl<=0)return;S.q.chests=(S.q.chests||0)+1;
+    const k=me(),pool=[];['hat','outfit'].forEach(t=>Object.keys(SHOP[t]||{}).forEach(id=>{if(!S.own[k].includes(t+':'+id))pool.push([t,id])}));
+    if(pool.length&&Math.random()<.35){const [t,id]=pool[Math.floor(Math.random()*pool.length)];S.own[k].push(t+':'+id);S.qprize='You found: '+itemName(t,id)+'! It is in your Shop now.';toast('Treasure!')}
+    else{const c=[20,30,30,40,50][Math.floor(Math.random()*5)];S.coins[k]+=c;S.cl.unshift({k,n:c,why:'Treasure chest'});S.cl=S.cl.slice(0,30);S.qprize='+'+c+' coins!';toast('Treasure!')}
+  }
+  else if(a==='qprizeok'){S.qprize=null}
   else if(a==='qtake'){const x=find(v);if(x&&!q.act.some(y=>y.id===v)){q.act.push({id:x.id,t:x.t,k:x.k,planned:false});toast('Quest taken')}S.qpick=null}
   else if(a==='qdrop'){q.act=q.act.filter(x=>x.id!==v)}
-  else if(a==='qdone'){const x=q.act.find(y=>y.id===v);if(x){q.act=q.act.filter(y=>y.id!==v);q.done.push({id:x.id,t:x.t,k:x.k,date:todayIso(),by:me()});S.qmem={t:x.t};earn(5,'Quest finished')}}
+  else if(a==='qdone'){const x=q.act.find(y=>y.id===v);if(x){q.act=q.act.filter(y=>y.id!==v);q.done.push({id:x.id,t:x.t,k:x.k,date:todayIso(),by:me()});S.qmem={t:x.t,id:x.id};earn(5,'Quest finished')}}
   else if(a==='qplan'){const x=q.act.find(y=>y.id===v);if(x&&!x.planned){const d=isoOff(1);S.events.push({date:d,d:dayDiff(d),t:'18:00',title:'Quest: '+x.t,who:'both'});x.planned=true;toast('Added to Plan for tomorrow. You can change it there.')}}
-  else if(a==='qmemyes'){if(S.qmem){S.mems.push({id:uid2(),date:todayIso(),title:S.qmem.t,text:'Date quest finished.',fav:false,photo:null});S.qmem=null;toast('Saved to your Memories')}}
+  else if(a==='qmemyes'){if(S.qmem){S.mems.push({id:uid2(),date:todayIso(),title:S.qmem.t,text:'Date quest finished.',fav:false,qid:S.qmem.id,photo:((qPhotos(S.qmem.id)[0]||{}).photo)||null,photos:qPhotos(S.qmem.id).slice(0,5).map(x=>x.photo)});S.qmem=null;toast('Saved to your Memories')}}
+  else if(a==='qtalemem'){const x=S.q.done.find(y=>y.id===v);if(x&&!S.mems.some(m=>m.qid===v)){const ph=qPhotos(v).slice(0,5).map(y=>y.photo);S.mems.push({id:uid2(),date:x.date||todayIso(),title:x.t,text:'Date quest finished.',fav:false,qid:v,photo:ph[0]||null,photos:ph});toast('Saved to your Memories')}}
   else if(a==='qmemno'){S.qmem=null}
+  else if(a==='qphdel'){if(S.qphc===v){S.qph=S.qph.filter(x=>x.id!==v);S.qphc=null;toast('Photo removed')}else S.qphc=v}
+  else if(a==='qall'){S.qall=!S.qall}
+  else if(a==='qpe'){S.qpe=S.qpe===String(v)?null:String(v);S.qphc=null}
   else if(a==='qadd'){S.qadd=true}
   else if(a==='qcancel'){S.qadd=false}
   else if(a==='qdel'){q.mine=q.mine.filter(x=>x.id!==v)}
@@ -803,7 +924,7 @@ V.home=()=>{
 
   <section class="card px">
     ${cardHead('Memories','memories','Open timeline')}
-    ${mem?`<div class="minip">${photoHtml(mem)}</div>
+    ${mem?`<div class="minip">${photoHtml(mem,true)}</div>
     <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><b style="overflow-wrap:anywhere">${esc(mem.title)}</b><span class="muted" style="flex:none">${fmtDate(mem.date)}</span></div>
     <div class="muted" style="font-size:14px;margin-top:6px">${S.mems.length} ${S.mems.length===1?'memory':'memories'} on your timeline, ${favs} favourite${favs===1?'':'s'}</div>`:'<div class="muted">No memories yet. Add your first one.</div>'}
   </section>
@@ -1029,7 +1150,8 @@ V.memories=()=>{
       ${repHtml(m)}
       <div class="ents">${S.confirm===m.id
         ?`<span class="muted">Delete this memory?</span><span class="row"><button class="btn px s c-coral" style="min-height:40px;padding:0 14px" data-act="mdelyes" data-v="${m.id}">Delete</button><button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="mdelno">Keep</button></span>`
-        :`<button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="mrep" data-v="${m.id}">Reply${(m.replies||[]).length?' ('+m.replies.length+')':''}</button><button class="link" data-act="mdel" data-v="${m.id}">Delete</button>`}</div>
+        :`<button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="mrep" data-v="${m.id}">Reply${(m.replies||[]).length?' ('+m.replies.length+')':''}</button><span class="row" style="gap:16px;flex-wrap:nowrap;white-space:nowrap"><button class="link" data-act="mpe" data-v="${m.id}">${S.mpe===String(m.id)?'Done':'Edit photos'}</button><button class="link" data-act="mdel" data-v="${m.id}">Delete</button></span>`}</div>
+      ${S.confirm===m.id?'':S.mpe===String(m.id)?`<div class="row" style="margin-top:8px;gap:10px;flex-wrap:wrap"><input class="sr" type="file" id="mf-${m.id}" data-mid="${m.id}" accept="image/*" multiple><label class="btn px s c-white" for="mf-${m.id}" style="min-height:40px;padding:0 14px;display:inline-flex;align-items:center">Add photos</label></div><div class="muted" style="font-size:13px;margin-top:6px">Tap the × on a photo to remove it.</div>`:''}
     </article>`;
   });
   const form=S.madd?`<section class="card px"><p class="eyebrow">${FL(2)}New memory</p>
@@ -1037,9 +1159,9 @@ V.memories=()=>{
       <label class="fld" for="memtitle"><span>What happened?</span><input class="pxin px s" type="text" id="memtitle" placeholder="Our first picnic" required></label>
       <label class="fld" for="memdate"><span>When?</span><input class="pxin px s" type="date" id="memdate" value="${todayIso()}" required></label>
       <label class="fld" for="memtext"><span>Tell the story (optional)</span><textarea class="pxin px s ta" id="memtext" placeholder="What do you want to remember?"></textarea></label>
-      <div class="fld"><span>Photo (optional)</span>
-        <div class="prev" id="mprev">${S.mphoto?`<div class="photo px s c-white"><div class="ph"><img src="${S.mphoto}" alt="Chosen photo"></div></div>`:''}</div>
-        <div class="row" style="flex-wrap:wrap"><input class="sr" type="file" id="memfile" accept="image/*"><label class="btn px s c-white" for="memfile" style="display:inline-flex;align-items:center">${S.mphoto?'Change photo':'Choose a photo'}</label>${S.mphoto?`<button type="button" class="link" data-act="mrm">Remove photo</button>`:''}</div>
+      <div class="fld"><span>Photos (optional, up to 5)</span>
+        <div class="prev" id="mprev">${S.mphotos.length?memGal({id:'new',title:'new memory'},S.mphotos,'mprm'):''}</div>
+        <div class="row" style="flex-wrap:wrap"><input class="sr" type="file" id="memfile" accept="image/*" multiple><label class="btn px s c-white" for="memfile" style="display:inline-flex;align-items:center">${S.mphotos.length?'Add more photos':'Choose photos'}</label></div>
       </div>
       <button class="btn px s me-${me()}" type="submit">Save memory</button>
       <button class="btn px s c-white" type="button" data-act="mcancel">Cancel</button>
@@ -1071,9 +1193,9 @@ document.addEventListener('click',e=>{
   if(a.startsWith('tet-')){teAct(a);return}
   if(/^(ttt|c4|pz|uno)-/.test(a)){gAct(a,v);render();return}
   if(a==='game'){if(v==='sudoku'&&!S.su)suNew('easy');if(v==='scrabble'&&!S.sc)scNew();gOpen(v);S.tab=v;window.scrollTo(0,0);render();return}
-  if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;S.ledit=null;S.evedit=null;S.evdel=null;window.scrollTo(0,0)}
+  if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.mphotos=[];S.mpe=null;S.qpe=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;S.ledit=null;S.evedit=null;S.evdel=null;window.scrollTo(0,0)}
   else if(a==='mood'){S.mood[me()]=v;const td=todayIso();if(S.moodDay[me()]!==td){S.moodDay[me()]=td;earn(2,'Mood shared')}}
-  else if(a&&a[0]==='q'&&/^q(f|rand|take|drop|done|plan|memyes|memno|add|cancel|del)$/.test(a)){qAct(a,v)}
+  else if(a&&a[0]==='q'&&/^q(f|all|pe|talemem|phdel|spin|chest|prizeok|rand|take|drop|done|plan|memyes|memno|add|cancel|del)$/.test(a)){qAct(a,v)}
   else if(a==='music'){musicToggle();return}
   else if(a==='songedit'){S.songEdit=true;render();return}
   else if(a==='songcancel'){S.songEdit=false;render();return}
@@ -1083,7 +1205,7 @@ document.addEventListener('click',e=>{
   else if(a==='mday'){S.day=+v;S.adding=false;S.scrollDay=true}
   else if(a==='mprev'){S.mon=(S.mon||0)-1}
   else if(a==='mnext'){S.mon=(S.mon||0)+1}
-  else if(a==='quick'){S.tab=v;S.adding=false;S.madd=false;S.eadd=false;S.gadd=false;if(v==='plan'){S.day=0;S.adding=true}if(v==='money'){S.mtab='spend';S.eadd=true}if(v==='memories'){S.madd=true;S.mphoto=null}if(v==='lists'){S.list=S.list||'groceries';S.focusItem=true}window.scrollTo(0,0)}
+  else if(a==='quick'){S.tab=v;S.adding=false;S.madd=false;S.eadd=false;S.gadd=false;if(v==='plan'){S.day=0;S.adding=true}if(v==='money'){S.mtab='spend';S.eadd=true}if(v==='memories'){S.madd=true;S.mphoto=null;S.mphotos=[]}if(v==='lists'){S.list=S.list||'groceries';S.focusItem=true}window.scrollTo(0,0)}
   else if(a==='customize'){if(!['search','settings','customize'].includes(S.tab))S.back=S.tab;S.tab='customize';window.scrollTo(0,0)}
   else if(a==='cset'){const [w,key,val]=v.split('|');S.chars[w][key]=val}
   else if(a==='rdel'){S.rdel=v}
@@ -1140,9 +1262,12 @@ document.addEventListener('click',e=>{
   else if(a==='evdelyes'){S.events.splice(+v,1);S.evdel=null;toast('Plan deleted')}
   else if(a==='toggle'){const it=S.lists[S.list][+v];it.done=!it.done;if(it.done)it.doneOn=todayIso();else delete it.doneOn;if(it.done&&!it.paid){it.paid=true;earn(2,'Ticked off')}}
   else if(a==='fav'){const m=S.mems.find(x=>x.id===+v);if(m)m.fav=!m.fav}
-  else if(a==='addmem'){S.madd=true;S.mphoto=null}
-  else if(a==='mcancel'){S.madd=false;S.mphoto=null}
-  else if(a==='mrm'){S.mphoto=null}
+  else if(a==='addmem'){S.madd=true;S.mphoto=null;S.mphotos=[]}
+  else if(a==='mcancel'){S.madd=false;S.mphoto=null;S.mphotos=[]}
+  else if(a==='mrm'){S.mphoto=null;S.mphotos=[]}
+  else if(a==='mpe'){S.mpe=S.mpe===String(v)?null:String(v);S.mphc=null}
+  else if(a==='mprm'){const i=+v.split('|')[1];S.mphotos.splice(i,1)}
+  else if(a==='mphdel'){const [id,i]=v.split('|'),m=S.mems.find(x=>String(x.id)===id);if(m){if(S.mphc===v){const ph=memPhotos(m).slice();ph.splice(+i,1);m.photos=ph;m.photo=ph[0]||null;S.mphc=null;toast('Photo removed')}else S.mphc=v}}
   else if(a==='mdel'){S.confirm=+v}
   else if(a==='mdelno'){S.confirm=null}
   else if(a==='mdelyes'){S.mems=S.mems.filter(x=>x.id!==+v);S.confirm=null;toast('Memory deleted')}
@@ -1174,8 +1299,8 @@ document.addEventListener('submit',e=>{
     S.lists[S.list].push({t:v,done:false,by:me()});render();$('#newitem').focus();
   }else if(id==='memform'){
     const title=$('#memtitle').value.trim();if(!title)return;
-    S.mems.push({id:uid2(),date:$('#memdate').value||todayIso(),title,text:$('#memtext').value.trim(),fav:false,photo:S.mphoto});
-    S.madd=false;S.mphoto=null;render();toast('Memory added to your timeline');earn(10,'Memory added');
+    S.mems.push({id:uid2(),date:$('#memdate').value||todayIso(),title,text:$('#memtext').value.trim(),fav:false,photo:S.mphotos[0]||null,photos:S.mphotos.slice()});
+    S.madd=false;S.mphoto=null;S.mphotos=[];render();toast('Memory added to your timeline');earn(10,'Memory added');
   }else if(id==='incform'){
     const amt=parseFloat($('#incamt').value),title=$('#inctitle').value.trim();if(!(amt>0)||!title)return;
     S.inc.push({id:uid2(),amt:Math.round(amt*100)/100,title,date:$('#incdate').value||todayIso(),rep:$('#increp').checked});
@@ -1211,22 +1336,25 @@ document.addEventListener('submit',e=>{
   }
 });
 
-/* photo picker: shrink the picture so the page stays light */
-document.addEventListener('change',e=>{
-  if(e.target.id!=='memfile')return;
-  const f=e.target.files&&e.target.files[0];if(!f)return;
-  const url=URL.createObjectURL(f),img=new Image();
-  img.onload=()=>{
-    const max=800,k=Math.min(1,max/Math.max(img.width,img.height));
-    const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    S.mphoto=c.toDataURL('image/jpeg',.75);URL.revokeObjectURL(url);
-    const keep={t:$('#memtitle').value,d:$('#memdate').value,x:$('#memtext').value};
+/* photo picker: shrink pictures so the page stays light */
+function shrinkMem(f){return new Promise((ok,no)=>{const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{const k=Math.min(1,720/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',.7))};img.onerror=()=>{URL.revokeObjectURL(url);no(new Error('bad'))};img.src=url})}
+document.addEventListener('change',async e=>{
+  const t=e.target;if(!t||!t.id)return;
+  const isNew=t.id==='memfile',mid=t.dataset&&t.dataset.mid;if(!isNew&&!mid)return;
+  const files=[...(t.files||[])];t.value='';if(!files.length)return;
+  const m=isNew?null:S.mems.find(x=>String(x.id)===mid);if(!isNew&&!m)return;
+  let cur=isNew?S.mphotos.slice():memPhotos(m).slice();
+  const room=5-cur.length;if(room<=0){toast('That is plenty of photos for one memory');return}
+  toast('Adding photos...');
+  for(const f of files.slice(0,room)){
+    try{const d=await shrinkMem(f);if(JSON.stringify(cur).length+d.length>850000){toast('That memory is full of photos');break}cur.push(d)}catch(err){toast('That file could not be opened as a picture.')}
+  }
+  if(isNew){
+    S.mphotos=cur;
+    const keep={t:$('#memtitle')&&$('#memtitle').value,d:$('#memdate')&&$('#memdate').value,x:$('#memtext')&&$('#memtext').value};
     render();
-    $('#memtitle').value=keep.t;$('#memdate').value=keep.d;$('#memtext').value=keep.x;
-  };
-  img.onerror=()=>{URL.revokeObjectURL(url);toast('That file could not be opened as a picture.')};
-  img.src=url;
+    if($('#memtitle')){$('#memtitle').value=keep.t;$('#memdate').value=keep.d;$('#memtext').value=keep.x}
+  }else{m.photos=cur;m.photo=cur[0]||null;render();queueSync()}
 });
 
 /* ---------- static decoration ---------- */
@@ -1296,7 +1424,7 @@ V.more=()=>`<section class="card px"><p class="eyebrow">${FL(2)}Us</p>
   <button class="res" data-act="tab" data-v="shop">${spr(SP.money,3)}<span class="grow"><b>Coin shop</b><span class="muted" style="display:block;font-size:14px">You have ${S.coins[me()]} coins. Hats, outfits, looks and themes.</span></span></button>
 </section>
 <section class="card px"><p class="eyebrow">${FL(2)}Date quests</p>
-  <button class="res" data-act="tab" data-v="quests">${spr(SP.star,3)}<span class="grow"><b>Quest board</b><span class="muted" style="display:block;font-size:14px">${S.q.done.length} done, ${S.q.act.length} in progress. Pick a date idea together.</span></span></button>
+  <button class="res" data-act="tab" data-v="quests">${spr(SP.star,3)}<span class="grow"><b>The Adventure Board</b><span class="muted" style="display:block;font-size:14px">${S.q.done.length} tales written, ${S.q.act.length} quests underway. Spin the wheel of fate!</span></span></button>
 </section>
 <section class="card px"><p class="eyebrow">${FL(2)}Games</p>
   <button class="res" data-act="game" data-v="sudoku">${spr(SP.sudoku,3)}<span class="grow"><b>Sudoku</b><span class="muted" style="display:block;font-size:14px">Solve a puzzle together. Easy, medium or hard.</span></span></button>
@@ -1866,7 +1994,7 @@ const backupObj=()=>({app:'Our Nook',version:1,saved:new Date().toISOString(),na
 function restoreBackup(txt){
   try{
     const d=JSON.parse(txt);if(!d||d.app!=='Our Nook')return false;
-    if(d.q&&Array.isArray(d.q.done))S.q={done:d.q.done,act:d.q.act||[],mine:d.q.mine||[]};
+    if(d.q&&Array.isArray(d.q.done))S.q={done:d.q.done,act:d.q.act||[],mine:d.q.mine||[],chests:d.q.chests||0};
     ['events','mems','exp','goals','sav','inc'].forEach(k=>{if(Array.isArray(d[k]))S[k]=d[k]});
     if(d.lists&&typeof d.lists==='object')S.lists=d.lists;
     if(d.mood&&typeof d.mood==='object')S.mood=d.mood;
@@ -1976,7 +2104,7 @@ const SLICES={
   lists:{path:()=>'shared/lists',out:()=>S.lists,inn:v=>{S.lists=Object.assign({groceries:[],todo:[],bucket:[]},v||{})}},
   profile:{path:()=>'shared/profile',out:()=>({names:{a:P.a.name,b:P.b.name},appName:S.appName,chars:S.chars}),
     inn:v=>{if(!v)return;if(v.names){P.a.name=v.names.a||P.a.name;P.b.name=v.names.b||P.b.name}if(v.appName)S.appName=v.appName;if(v.chars&&v.chars.a&&v.chars.b)S.chars=v.chars}},
-  quests:{path:()=>'shared/quests',out:()=>S.q,inn:v=>{S.q={done:(v&&v.done)||[],act:(v&&v.act)||[],mine:(v&&v.mine)||[]}}},
+  quests:{path:()=>'shared/quests',out:()=>S.q,inn:v=>{S.q={done:(v&&v.done)||[],act:(v&&v.act)||[],mine:(v&&v.mine)||[],chests:(v&&v.chests)||0}}},
   games:{path:()=>'shared/games',out:gamesOut,inn:gamesIn},
   money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav,inc:S.M[S.me].inc}),
     inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[],inc:v.inc||[]}}}
@@ -2012,6 +2140,11 @@ function flush(){
     const j=JS(sl.out());if(j===SYNC.last[key])continue;
     SYNC.last[key]=j;SYNC.db.setDoc(sl.path(),{j,by:S.me,t:Date.now()}).catch(syncErr);
   }
+  if(SYNC.loaded.qph){
+    const cq=new Map(S.qph.map(m=>[m.id,JS(m)]));
+    for(const [id,j] of cq)if(SYNC.qphLast.get(id)!==j){SYNC.qphLast.set(id,j);SYNC.db.setDoc('shared/qphotos/items/'+id,{j,by:S.me,t:Date.now()}).catch(syncErr)}
+    for(const id of [...SYNC.qphLast.keys()])if(!cq.has(id)){SYNC.qphLast.delete(id);SYNC.db.delDoc('shared/qphotos/items/'+id).catch(syncErr)}
+  }
   if(SYNC.loaded.mems){
     const cur=new Map(S.mems.map(m=>[m.id,JS(m)]));
     for(const [id,j] of cur)if(SYNC.memLast.get(id)!==j){SYNC.memLast.set(id,j);SYNC.db.setDoc('shared/mems/items/'+id,{j,by:S.me,t:Date.now()}).catch(syncErr)}
@@ -2038,7 +2171,14 @@ function startWatch(){
       }
     }));
   });
-  SYNC.memLast=new Map();
+  SYNC.memLast=new Map();SYNC.qphLast=new Map();
+  SYNC.unsubs.push(db.watchCol('shared/qphotos/items',(list,err)=>{
+    if(err){onWatchError(err);return}
+    if(SYNC.loaded.qph){const cur=new Map(S.qph.map(m=>[m.id,JS(m)]));let d=cur.size!==SYNC.qphLast.size;if(!d)for(const [i,j] of cur)if(SYNC.qphLast.get(i)!==j){d=true;break}if(d)return}
+    const ps=[];list.forEach(d=>{try{ps.push(JSON.parse(d.data.j))}catch(e){}});
+    ps.sort((x,y)=>(x.id||0)-(y.id||0));
+    S.qph=ps;SYNC.qphLast=new Map(ps.map(m=>[m.id,JS(m)]));SYNC.loaded.qph=true;softRender();
+  }));
   SYNC.unsubs.push(db.watchCol('shared/mems/items',(list,err)=>{
     if(err){onWatchError(err);return}
     if(SYNC.loaded.mems&&memsDirty())return;
