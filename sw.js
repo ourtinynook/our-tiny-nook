@@ -1,5 +1,5 @@
 // Keeps the app fast and lets it open without internet.
-const V = 'nook-v2';
+const V = 'nook-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'words.txt'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -14,6 +14,7 @@ self.addEventListener('fetch', e => {
   // never touch the database or sign-in traffic
   if (u.hostname.endsWith('googleapis.com') && u.hostname !== 'fonts.googleapis.com') return;
   if (u.hostname.endsWith('firebaseapp.com') || u.hostname.endsWith('google.com') || u.hostname.endsWith('firebaseio.com')) return;
+  if (u.pathname.endsWith('.mp3')) return; // let the browser stream and cache music itself
   const isPage = r.mode === 'navigate' || u.pathname.endsWith('/index.html');
   if (isPage) {
     // newest page first, saved copy when offline

@@ -583,7 +583,7 @@ const TITLES={home:'Our Nook',plan:'Plan',lists:'Lists',notes:'Notes',memories:'
 
 /* ---------- sample data (nothing is saved anywhere) ---------- */
 const isoOff=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString('en-CA')};
-const S={me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
+const S={song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
   mood:{a:'',b:''},
   events:[],
   lists:{groceries:[],todo:[],bucket:[]},
@@ -651,6 +651,40 @@ function sweepLists(){
 const V={};
 function cardHead(title,go,label){return `<div class="row" style="justify-content:space-between;margin-bottom:10px"><p class="eyebrow" style="margin:0">${FL(2)}${title}</p><button class="btn px s c-gold" style="min-height:40px;padding:0 12px;font-size:15px" data-act="go" data-v="${go}">${label||'Open'}</button></div>`}
 const tenBlocks=f=>Array.from({length:10},(_,i)=>`<i class="${i<f?'f':''}"></i>`).join('');
+
+
+/* Background music: put song.mp3 next to index.html */
+const MUSIC={a:null,on:(()=>{try{return localStorage.getItem('nook-music')!=='off'}catch(e){return true}})()};
+function musicInit(){
+  const a=MUSIC.a=new Audio('song.mp3');a.loop=true;a.volume=.6;a.preload='auto';
+  const go=()=>{if(!MUSIC.on)return;const r=a.play();if(r&&r.catch)r.catch(()=>{})};
+  go();
+  const first=()=>{go();if(!a.paused||!MUSIC.on){['pointerdown','touchend','keydown'].forEach(t=>document.removeEventListener(t,first,true))}};
+  ['pointerdown','touchend','keydown'].forEach(t=>document.addEventListener(t,first,true));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)a.pause();else go()});
+}
+function musicToggle(){MUSIC.on=!MUSIC.on;try{localStorage.setItem('nook-music',MUSIC.on?'on':'off')}catch(e){}
+  if(MUSIC.on){const r=MUSIC.a.play();if(r&&r.catch)r.catch(()=>toast('Add song.mp3 to the app first'))}else MUSIC.a.pause();render()}
+musicInit();
+function songEmbed(u){
+  u=(u||'').trim();let m;
+  if(m=u.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist|episode)\/([A-Za-z0-9]+)/))return {h:m[1]==='track'?152:352,src:'https://open.spotify.com/embed/'+m[1]+'/'+m[2]};
+  if(m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|music\.youtube\.com\/watch\?(?:.*&)?v=)([\w-]{11})/))return {h:210,src:'https://www.youtube.com/embed/'+m[1]+'?playsinline=1'};
+  if(/^https?:\/\/(on\.)?soundcloud\.com\//.test(u))return {h:166,src:'https://w.soundcloud.com/player/?url='+encodeURIComponent(u)};
+  if(m=u.match(/music\.apple\.com\/([^?#]+)/))return {h:175,src:'https://embed.music.apple.com/'+m[1]};
+  return null;
+}
+function songCard(){
+  const e=songEmbed(S.song.url);
+  if(S.songEdit||!e)return `<section class="card px"><p class="eyebrow">${FL(2)}Our song</p>
+    <form id="songform"><label class="muted" for="songurl" style="font-size:14px">Paste a Spotify or YouTube link</label>
+    <input id="songurl" type="url" inputmode="url" placeholder="https://open.spotify.com/track/..." value="${esc(S.song.url||'')}" style="width:100%;margin:8px 0">
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn px s c-gold" type="submit">Save song</button>${S.song.url?`<button class="btn px s c-white" type="button" data-act="songcancel">Cancel</button><button class="btn px s c-coral" type="button" data-act="songclear">Remove</button>`:''}</div>
+    <p class="muted" style="font-size:13px;margin-top:8px">Spotify, YouTube, SoundCloud and Apple Music links work.</p></form></section>`;
+  return `<section class="card px"><div class="row" style="justify-content:space-between"><p class="eyebrow" style="margin:0">${FL(2)}Our song</p><button class="btn px s c-white" data-act="songedit">Change</button></div>
+    <iframe title="Our song" src="${e.src}" height="${e.h}" style="width:100%;border:0;border-radius:12px;margin-top:12px;background:#0001" allow="autoplay; encrypted-media; fullscreen" loading="lazy"></iframe>
+    ${S.song.by?`<p class="muted" style="font-size:13px;margin-top:8px">Picked by ${esc(P[S.song.by].name)}</p>`:''}</section>`;
+}
 V.home=()=>{
   const o=other(),moods=['Happy','Calm','Tired','Stressed','Hungry'];
   const today=S.events.filter(e=>e.d===0).sort((a,b)=>a.t.localeCompare(b.t));
@@ -923,7 +957,7 @@ function render(){
   sweepLists();
   S.events.forEach(e=>{if(e.date)e.d=dayDiff(e.date)});
   $('#title').textContent=S.tab==='home'?S.appName:TITLES[S.tab];
-  $('#view').innerHTML=V[S.tab]();
+  {const h=V[S.tab]();if(render.last!==S.tab+'|'+h||!$('#view').firstChild){render.last=S.tab+'|'+h;$('#view').innerHTML=h}}
   $('#tabs').innerHTML=TABS.map(([k,l])=>`<button class="tab px s ${(GAMES.includes(S.tab)?"more":S.tab)===k?'on':''}" data-act="tab" data-v="${k}" aria-label="${l}">${(GAMES.includes(S.tab)?"more":S.tab)===k?`<span class="star">${spr(SP.star,3)}</span>`:''}${spr(SP[k],2.5)}${l}</button>`).join('');
   $('#switch').innerHTML=`${av(me(),2.5)}<span class="nm">${P[me()].name}</span>`;
   $('#switch').setAttribute('aria-label','Signed in as '+P[me()].name+'. Open settings and account.');
@@ -943,6 +977,10 @@ document.addEventListener('click',e=>{
   if(a==='game'){if(v==='sudoku'&&!S.su)suNew('easy');if(v==='scrabble'&&!S.sc)scNew();gOpen(v);S.tab=v;window.scrollTo(0,0);render();return}
   if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;S.ledit=null;S.evedit=null;S.evdel=null;window.scrollTo(0,0)}
   else if(a==='mood'){S.mood[me()]=v;const td=todayIso();if(S.moodDay[me()]!==td){S.moodDay[me()]=td;earn(2,'Mood shared')}}
+  else if(a==='music'){musicToggle();return}
+  else if(a==='songedit'){S.songEdit=true;render();return}
+  else if(a==='songcancel'){S.songEdit=false;render();return}
+  else if(a==='songclear'){S.song={url:'',by:''};S.songEdit=false;render();queueSync();return}
   else if(a==='think'){S.thinkTs[me()]=Date.now();toast('Sent to '+P[other()].name+'. They will see it right away.');const td=todayIso();if(S.thinkDay[me()]!==td){S.thinkDay[me()]=td;earn(1,'Sent to '+P[other()].name)}render();return}
   else if(a==='day'){S.day=+v;S.adding=false;S.evedit=null;S.evdel=null}
   else if(a==='mday'){S.day=+v;S.adding=false;S.scrollDay=true}
@@ -1014,7 +1052,10 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('submit',e=>{
   e.preventDefault();const id=e.target.id;
-  if(id==='evform'){
+  if(id==='songform'){
+    const v=$('#songurl').value.trim();if(!songEmbed(v)){toast('That link did not work. Try a Spotify or YouTube link.');return}
+    S.song={url:v,by:me()};S.songEdit=false;render();toast('Song saved');queueSync();
+  }else if(id==='evform'){
     S.events.push({d:S.day,date:isoOff(S.day),t:$('#evtime').value||'12:00',title:$('#evtitle').value.trim(),who:$('#evwho').value});
     S.adding=false;render();toast('Plan added');earn(3,'Plan added');
   }else if(id==='ledform'){
@@ -1735,6 +1776,7 @@ V.settings=()=>{
     <div class="row" style="gap:10px">${av(me(),4)}<div style="min-width:0"><b>${esc(P[me()].name)}</b><div class="muted" style="font-size:14px;overflow-wrap:anywhere">${esc(em)}</div></div></div>
     <div class="muted" style="font-size:14px;margin:10px 0">Everything except money is shared with ${esc(P[other()].name)}. Your money stays private to you.</div>
     <button class="btn px s c-white" data-act="signout">Sign out</button></section>
+  <section class="card px"><p class="eyebrow">${FL(2)}Our song</p><div class="row" style="justify-content:space-between"><span class="muted">Plays when you open the app</span><button class="btn px s ${MUSIC.on?'c-leaf':'c-white'}" data-act="music">${MUSIC.on?'Music on':'Music off'}</button></div></section>
   <section class="card px"><p class="eyebrow">${FL(2)}Notifications</p>${pushCard()}</section>
   <section class="card px"><p class="eyebrow">${FL(2)}Look of the world</p>
     <div class="looks">${Object.entries(LOOKS).map(([k,L])=>`<button class="look px s ${S.look===k?'on':'c-white'}" data-act="look" data-v="${k}" aria-pressed="${S.look===k}"><span class="sw2" style="background:${swatch(L)}"></span>${L.name}${owns(me(),'theme',k)?'':' \u00b7 '+SHOP.theme[k]+' coins'}</button>`).join('')}</div>
