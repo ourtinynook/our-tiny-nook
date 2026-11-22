@@ -81,6 +81,7 @@
 .sq.l{background:#FFF6E0}.sq.d{background:#F0D9B5}.sq.sel{background:#FFE08A}
 .sq.hint::after{content:"";position:absolute;width:28%;height:28%;border-radius:50%;background:rgba(91,74,122,.38)}.sq.hint.cap::after{width:86%;height:86%;background:none;border:3px solid rgba(91,74,122,.5)}
 .pc{color:#F4978E;text-shadow:1px 0 #5B4A7A,-1px 0 #5B4A7A,0 1px #5B4A7A,0 -1px #5B4A7A;position:relative;z-index:1}.pc.b{color:#8EC9F0}
+.ent.by-a{--edge:#DE7B72}.ent.by-b{--edge:#5FA6D8}
 </style>
 <title>Our Nook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -922,8 +923,8 @@ function qAct(a,v){
   else if(a==='qdrop'){q.act=q.act.filter(x=>x.id!==v)}
   else if(a==='qdone'){const x=q.act.find(y=>y.id===v);if(x){q.act=q.act.filter(y=>y.id!==v);q.done.push({id:x.id,t:x.t,k:x.k,date:todayIso(),by:me()});S.qmem={t:x.t,id:x.id};earn(5,'Quest finished')}}
   else if(a==='qplan'){const x=q.act.find(y=>y.id===v);if(x&&!x.planned){const d=isoOff(1);S.events.push({date:d,d:dayDiff(d),t:'18:00',title:'Quest: '+x.t,who:'both'});x.planned=true;toast('Added to Plan for tomorrow. You can change it there.')}}
-  else if(a==='qmemyes'){if(S.qmem){S.mems.push({id:uid2(),date:todayIso(),title:S.qmem.t,text:'Date quest finished.',fav:false,qid:S.qmem.id,photo:((qPhotos(S.qmem.id)[0]||{}).photo)||null,photos:qPhotos(S.qmem.id).slice(0,5).map(x=>x.photo)});S.qmem=null;toast('Saved to your Memories')}}
-  else if(a==='qtalemem'){const x=S.q.done.find(y=>y.id===v);if(x&&!S.mems.some(m=>m.qid===v)){const ph=qPhotos(v).slice(0,5).map(y=>y.photo);S.mems.push({id:uid2(),date:x.date||todayIso(),title:x.t,text:'Date quest finished.',fav:false,qid:v,photo:ph[0]||null,photos:ph});toast('Saved to your Memories')}}
+  else if(a==='qmemyes'){if(S.qmem){S.mems.push({id:uid2(),by:me(),date:todayIso(),title:S.qmem.t,text:'Date quest finished.',fav:false,qid:S.qmem.id,photo:((qPhotos(S.qmem.id)[0]||{}).photo)||null,photos:qPhotos(S.qmem.id).slice(0,5).map(x=>x.photo)});S.qmem=null;toast('Saved to your Memories')}}
+  else if(a==='qtalemem'){const x=S.q.done.find(y=>y.id===v);if(x&&!S.mems.some(m=>m.qid===v)){const ph=qPhotos(v).slice(0,5).map(y=>y.photo);S.mems.push({id:uid2(),by:me(),date:x.date||todayIso(),title:x.t,text:'Date quest finished.',fav:false,qid:v,photo:ph[0]||null,photos:ph});toast('Saved to your Memories')}}
   else if(a==='qmemno'){S.qmem=null}
   else if(a==='qphdel'){if(S.qphc===v){S.qph=S.qph.filter(x=>x.id!==v);S.qphc=null;toast('Photo removed')}else S.qphc=v}
   else if(a==='qall'){S.qall=!S.qall}
@@ -1230,8 +1231,9 @@ V.memories=()=>{
   list.forEach(m=>{
     const y=m.date.slice(0,4);
     if(y!==lastYear){lastYear=y;html+=`<div class="year px s c-gold"><span class="node">${spr(SP.star,3)}</span>${y}</div>`}
-    html+=`<article class="ent card px"><span class="node">${spr(SP.heart,2,{p:'#F4978E'})}</span>
-      <div class="mtop"><span class="date px s c-sky">${fmtDate(m.date)}</span>
+    const by=m.by==='a'||m.by==='b'?m.by:null;
+    html+=`<article class="ent card px${by?' by-'+by:''}"><span class="node">${spr(SP.heart,2,{p:by==='b'?'#5FA6D8':'#F4978E'})}</span>
+      <div class="mtop"><span class="row" style="gap:8px;flex-wrap:wrap"><span class="date px s ${by?col(by):'c-sky'}">${fmtDate(m.date)}</span>${by?`<span class="row" style="gap:4px;font-size:14px">${av(by,2)}<b>${esc(P[by].name)}</b></span>`:`<span class="muted" style="font-size:13px">Who posted?</span><button class="link" style="min-height:36px" data-act="mby" data-v="${m.id}|a">${esc(P.a.name)}</button><button class="link" style="min-height:36px" data-act="mby" data-v="${m.id}|b">${esc(P.b.name)}</button>`}</span>
         <button class="heart" data-act="fav" data-v="${m.id}" aria-label="Favourite">${m.fav?HEART_FULL:HEART_OUT}</button></div>
       <h3>${esc(m.title)}</h3>
       ${photoHtml(m)}
@@ -1260,7 +1262,8 @@ V.memories=()=>{
   ${list.length?`<div class="tl">${html}</div>`:`<section class="card px empty">${spr(SP.heart,4)}<h2 style="margin-top:8px">No memories yet</h2><div class="muted">Add your first one with the button above.</div></section>`}`;
 };
 
-const _vm=V.memories;V.memories=()=>undoBar()+_vm()+binHtml();
+const _vm=V.memories;V.memories=()=>undoBar()+memLegend()+_vm()+binHtml();
+const memLegend=()=>S.mems.length?`<div class="legend2 px s c-white" style="padding:8px 12px;gap:16px"><span>Posted by</span><span><i class="dot a"></i>${esc(P.a.name)}</span><span><i class="dot b"></i>${esc(P.b.name)}</span></div>`:'';
 function undoBar(){const m=S.mundo&&S.mbin.find(x=>x.id===S.mundo);return m?`<section class="card px"><div class="row" style="justify-content:space-between;gap:10px"><span>Memory deleted.</span><button class="btn px s c-gold" data-act="mundo">Undo</button></div></section>`:''}
 function binHtml(){
   const L=S.mbin;if(!L.length)return '';
@@ -1367,6 +1370,7 @@ document.addEventListener('click',e=>{
   else if(a==='mdelno'){S.confirm=null}
   else if(a==='mdelyes'){const m=S.mems.find(x=>x.id===+v);if(m){S.mems=S.mems.filter(x=>x.id!==+v);m.del=todayIso();S.mbin.push(m);S.mundo=m.id;setTimeout(()=>{if(S.mundo===m.id){S.mundo=null;render()}},8000)}S.confirm=null}
   else if(a==='mundo'||a==='mrestore'){const id=a==='mundo'?S.mundo:+v,m=S.mbin.find(x=>x.id===id);if(m){S.mbin=S.mbin.filter(x=>x.id!==id);delete m.del;S.mems.push(m);S.mundo=null;toast('Memory restored')}}
+  else if(a==='mby'){const [id,k]=v.split('|'),m=S.mems.find(x=>x.id===+id);if(m&&(k==='a'||k==='b')){m.by=k;toast('Saved: '+P[k].name+' posted it')}}
   else if(a==='mbin'){S.mbinopen=!S.mbinopen}
   else if(a==='mgone'){S.mbc=+v}
   else if(a==='mgoneno'){S.mbc=null}
@@ -1399,7 +1403,7 @@ document.addEventListener('submit',e=>{
     S.lists[S.list].push({t:v,done:false,by:me()});render();$('#newitem').focus();
   }else if(id==='memform'){
     const title=$('#memtitle').value.trim();if(!title)return;
-    S.mems.push({id:uid2(),date:$('#memdate').value||todayIso(),title,text:$('#memtext').value.trim(),fav:false,photo:S.mphotos[0]||null,photos:S.mphotos.slice()});
+    S.mems.push({id:uid2(),by:me(),date:$('#memdate').value||todayIso(),title,text:$('#memtext').value.trim(),fav:false,photo:S.mphotos[0]||null,photos:S.mphotos.slice()});
     S.madd=false;S.mphoto=null;S.mphotos=[];render();toast('Memory added to your timeline');earn(10,'Memory added');
   }else if(id==='incform'){
     const amt=parseFloat($('#incamt').value),title=$('#inctitle').value.trim();if(!(amt>0)||!title)return;
