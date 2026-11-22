@@ -697,7 +697,7 @@ const TITLES={rv:'Reversi',ch:'Chess',mm:'Memory match',db:'Dots and boxes',home
 
 /* ---------- sample data (nothing is saved anywhere) ---------- */
 const isoOff=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString('en-CA')};
-const S={qall:false,mpe:null,qpe:null,qph:[],qphc:null,qwdeg:0,qprize:null,q:{done:[],act:[],mine:[],chests:0,unl:[],gone:0},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
+const S={mbin:[],mbinopen:false,mbc:null,mundo:null,qall:false,mpe:null,qpe:null,qph:[],qphc:null,qwdeg:0,qprize:null,q:{done:[],act:[],mine:[],chests:0,unl:[],gone:0},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
   mood:{a:'',b:''},
   events:[],
   lists:{groceries:[],todo:[],bucket:[]},
@@ -1260,6 +1260,12 @@ V.memories=()=>{
   ${list.length?`<div class="tl">${html}</div>`:`<section class="card px empty">${spr(SP.heart,4)}<h2 style="margin-top:8px">No memories yet</h2><div class="muted">Add your first one with the button above.</div></section>`}`;
 };
 
+const _vm=V.memories;V.memories=()=>undoBar()+_vm()+binHtml();
+function undoBar(){const m=S.mundo&&S.mbin.find(x=>x.id===S.mundo);return m?`<section class="card px"><div class="row" style="justify-content:space-between;gap:10px"><span>Memory deleted.</span><button class="btn px s c-gold" data-act="mundo">Undo</button></div></section>`:''}
+function binHtml(){
+  const L=S.mbin;if(!L.length)return '';
+  const rows=L.slice().sort((a,b)=>(b.del||'').localeCompare(a.del||'')).map(m=>`<div class="qrow"><div class="qt">${esc(m.title)}</div><div class="qsub">${fmtDate(m.date)} · deleted ${fmtDate(m.del)}</div><div class="qlinks"><button class="link" data-act="mrestore" data-v="${m.id}">Restore</button>${S.mbc===m.id?`<span class="muted" style="font-size:15px">Delete for good?</span><button class="link" data-act="mgoneyes" data-v="${m.id}">Yes</button><button class="link" data-act="mgoneno">Keep</button>`:`<button class="link" data-act="mgone" data-v="${m.id}">Delete for good</button>`}</div></div>`).join('');
+  return `<section class="card px"><button class="qdrop" data-act="mbin" aria-expanded="${!!S.mbinopen}"><span class="eyebrow" style="margin:0;border:0;padding:0">${FL(2)}Recently deleted</span><b class="qbadge">${L.length}</b><span class="qarr ${S.mbinopen?'open':''}">\u25be</span></button>${S.mbinopen?`<div class="muted" style="font-size:14px;margin:6px 0">Kept for 30 days, then removed for good.</div>${rows}`:''}</section>`}
 function render(){
   sweepLists();
   S.events.forEach(e=>{if(e.date)e.d=dayDiff(e.date)});
@@ -1359,7 +1365,12 @@ document.addEventListener('click',e=>{
   else if(a==='mphdel'){const [id,i]=v.split('|'),m=S.mems.find(x=>String(x.id)===id);if(m){if(S.mphc===v){const ph=memPhotos(m).slice();ph.splice(+i,1);m.photos=ph;m.photo=ph[0]||null;S.mphc=null;toast('Photo removed')}else S.mphc=v}}
   else if(a==='mdel'){S.confirm=+v}
   else if(a==='mdelno'){S.confirm=null}
-  else if(a==='mdelyes'){S.mems=S.mems.filter(x=>x.id!==+v);S.confirm=null;toast('Memory deleted')}
+  else if(a==='mdelyes'){const m=S.mems.find(x=>x.id===+v);if(m){S.mems=S.mems.filter(x=>x.id!==+v);m.del=todayIso();S.mbin.push(m);S.mundo=m.id;setTimeout(()=>{if(S.mundo===m.id){S.mundo=null;render()}},8000)}S.confirm=null}
+  else if(a==='mundo'||a==='mrestore'){const id=a==='mundo'?S.mundo:+v,m=S.mbin.find(x=>x.id===id);if(m){S.mbin=S.mbin.filter(x=>x.id!==id);delete m.del;S.mems.push(m);S.mundo=null;toast('Memory restored')}}
+  else if(a==='mbin'){S.mbinopen=!S.mbinopen}
+  else if(a==='mgone'){S.mbc=+v}
+  else if(a==='mgoneno'){S.mbc=null}
+  else if(a==='mgoneyes'){S.mbin=S.mbin.filter(x=>x.id!==+v);S.mbc=null;toast('Deleted for good')}
   render();
   if(S.scrollDay){S.scrollDay=false;const el=$('#daycard');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
   if(S.focusQ){S.focusQ=false;const qi=$('#q');if(qi)qi.focus()}
@@ -2240,7 +2251,7 @@ const SLICES={
 function seenThink(){try{return +(localStorage.getItem('nook-think')||0)}catch(e){return 0}}
 function heartFrom(k){try{localStorage.setItem('nook-think',String(S.thinkTs[k]))}catch(e){}toast(P[k].name+' is thinking of you')}
 const dirty=key=>{const sl=SLICES[key];if(sl.mine&&sl.mine!==S.me)return false;return JS(sl.out())!==SYNC.last[key]};
-const memsDirty=()=>{const cur=new Map(S.mems.map(m=>[m.id,JS(m)]));if(cur.size!==SYNC.memLast.size)return true;for(const [i,j] of cur)if(SYNC.memLast.get(i)!==j)return true;return false};
+const memsDirty=()=>{const cur=new Map(S.mems.concat(S.mbin).map(m=>[m.id,JS(m)]));if(cur.size!==SYNC.memLast.size)return true;for(const [i,j] of cur)if(SYNC.memLast.get(i)!==j)return true;return false};
 function syncErr(e){
   console.warn('sync',e);
   if(Date.now()-SYNC.errAt>8000){SYNC.errAt=Date.now();toast('Could not reach the database. Changes will save when you are back online.')}
@@ -2264,7 +2275,7 @@ function flush(){
     for(const id of [...SYNC.qphLast.keys()])if(!cq.has(id)){SYNC.qphLast.delete(id);SYNC.db.delDoc('shared/qphotos/items/'+id).catch(syncErr)}
   }
   if(SYNC.loaded.mems){
-    const cur=new Map(S.mems.map(m=>[m.id,JS(m)]));
+    const cur=new Map(S.mems.concat(S.mbin).map(m=>[m.id,JS(m)]));
     for(const [id,j] of cur)if(SYNC.memLast.get(id)!==j){SYNC.memLast.set(id,j);SYNC.db.setDoc('shared/mems/items/'+id,{j,by:S.me,t:Date.now()}).catch(syncErr)}
     for(const id of [...SYNC.memLast.keys()])if(!cur.has(id)){SYNC.memLast.delete(id);SYNC.db.delDoc('shared/mems/items/'+id).catch(syncErr)}
   }
@@ -2302,7 +2313,7 @@ function startWatch(){
     if(SYNC.loaded.mems&&memsDirty())return;
     const ms=[];list.forEach(d=>{try{ms.push(JSON.parse(d.data.j))}catch(e){}});
     ms.sort((x,y)=>(y.date||'').localeCompare(x.date||'')||(y.id||0)-(x.id||0));
-    S.mems=ms;SYNC.memLast=new Map(ms.map(m=>[m.id,JS(m)]));SYNC.loaded.mems=true;softRender();
+    S.mems=ms.filter(m=>!m.del);S.mbin=ms.filter(m=>m.del&&Date.now()-new Date(m.del+'T12:00:00')<30*864e5);SYNC.memLast=new Map(ms.map(m=>[m.id,JS(m)]));SYNC.loaded.mems=true;softRender();
   }));
 }
 function stopWatch(){SYNC.unsubs.forEach(u=>{try{u()}catch(e){}});SYNC.unsubs=[];SYNC.loaded={};SYNC.last={}}
