@@ -904,10 +904,10 @@ function qAct(a,v){
     if(QSPIN)return;const l=qAvailAll();if(!l.length){toast('No quests left. Add your own!');return}
     const x=l[Math.floor(Math.random()*l.length)],i=QORDER.indexOf(x.k),local=i*90+12+Math.random()*66;
     let target=Math.floor(S.qwdeg/360)*360+360*5+((360-local)%360);if(target<S.qwdeg+720)target+=360;
-    const el=document.getElementById('wheel'),pc=document.getElementById('qpickcard');if(pc)pc.style.visibility='hidden';
+    const el=document.getElementById('wheel'),pc=document.getElementById('qpickcard');if(pc){pc.style.opacity='.55';pc.querySelectorAll('button').forEach(b=>{b.disabled=true});const ey=pc.querySelector('.eyebrow'),ds=pc.querySelectorAll('div');if(ey&&ey.lastChild)ey.lastChild.textContent='The wheel is spinning...';if(ds[0])ds[0].textContent='...';if(ds[1])ds[1].textContent=''}
     QSPIN=true;
     if(el){el.style.transition='transform 4s cubic-bezier(.17,.67,.2,1)';void el.offsetWidth;el.style.transform='rotate('+target+'deg)'}
-    setTimeout(()=>{QSPIN=false;S.qwdeg=target;S.qpick=x.id;render()},el?4150:0);
+    setTimeout(()=>{QSPIN=false;S.qwdeg=target;S.qpick=x.id;render.last=null;render()},el?4150:0);
   }
   else if(a==='qchest'){
     const avl=Math.floor((S.q.done.length+(S.q.gone||0))/5)-(S.q.chests||0);if(avl<=0)return;S.q.chests=(S.q.chests||0)+1;
