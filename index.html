@@ -73,6 +73,14 @@
 .de{position:relative;border:0;background:none;padding:0;min-height:0;cursor:pointer}.de::after{content:"";position:absolute;background:rgba(91,74,122,.16);border-radius:3px}
 .de.h::after{inset:6px 2px}.de.v::after{inset:2px 6px}.de.o-a::after{background:#F4978E}.de.o-b::after{background:#8EC9F0}
 .dbx{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px}.dbx.o-a{background:rgba(244,151,142,.4)}.dbx.o-b{background:rgba(142,201,240,.4)}
+.rg{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#3E7F5A;padding:2px;max-width:min(340px,100%);margin:6px auto}
+.rc{aspect-ratio:1;background:#7CC99A;border:0;padding:0;display:flex;align-items:center;justify-content:center;min-width:0}
+.rd{width:78%;height:78%;border-radius:50%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}.rd.a{background:#F4978E}.rd.b{background:#8EC9F0}.rh{width:24%;height:24%;border-radius:50%;background:rgba(255,255,255,.7)}
+.bg8{display:grid;grid-template-columns:repeat(8,1fr);max-width:min(340px,100%);margin:6px auto;border:3px solid #5B4A7A}
+.sq{aspect-ratio:1;border:0;padding:0;display:flex;align-items:center;justify-content:center;position:relative;min-width:0;line-height:1;font-size:calc(min(340px,100vw - 56px)/8*.8)}
+.sq.l{background:#FFF6E0}.sq.d{background:#F0D9B5}.sq.sel{background:#FFE08A}
+.sq.hint::after{content:"";position:absolute;width:28%;height:28%;border-radius:50%;background:rgba(91,74,122,.38)}.sq.hint.cap::after{width:86%;height:86%;background:none;border:3px solid rgba(91,74,122,.5)}
+.pc{color:#F4978E;text-shadow:1px 0 #5B4A7A,-1px 0 #5B4A7A,0 1px #5B4A7A,0 -1px #5B4A7A;position:relative;z-index:1}.pc.b{color:#8EC9F0}
 </style>
 <title>Our Nook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -685,11 +693,11 @@ const HEART_FULL=spr(SP.heart,2,{p:'#F0657A'}), HEART_OUT=spr(SP.heart,2,{p:'#FF
 
 const P={a:{name:'Shaza',other:'b'},b:{name:'Syahirul',other:'a'}};
 const TABS=[['home','Home'],['plan','Plan'],['lists','Lists'],['memories','Memories'],['money','Money'],['more','More']];
-const TITLES={mm:'Memory match',db:'Dots and boxes',home:'Our Nook',plan:'Plan',lists:'Lists',notes:'Notes',memories:'Memories',money:'Money',more:'More',search:'Search',settings:'Settings',quests:'Date quests',customize:'Customize',sudoku:'Sudoku',scrabble:'Scrabble',shop:'Shop',ttt:'Tic-tac-toe',c4:'Connect 4',puzzle:'Puzzle',uno:'Uno',tetris:'Tetris'};
+const TITLES={rv:'Reversi',ch:'Chess',mm:'Memory match',db:'Dots and boxes',home:'Our Nook',plan:'Plan',lists:'Lists',notes:'Notes',memories:'Memories',money:'Money',more:'More',search:'Search',settings:'Settings',quests:'Date quests',customize:'Customize',sudoku:'Sudoku',scrabble:'Scrabble',shop:'Shop',ttt:'Tic-tac-toe',c4:'Connect 4',tetris:'Tetris'};
 
 /* ---------- sample data (nothing is saved anywhere) ---------- */
 const isoOff=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString('en-CA')};
-const S={qall:false,mpe:null,qpe:null,qph:[],qphc:null,qwdeg:0,qprize:null,q:{done:[],act:[],mine:[],chests:0,unl:[]},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
+const S={qall:false,mpe:null,qpe:null,qph:[],qphc:null,qwdeg:0,qprize:null,q:{done:[],act:[],mine:[],chests:0,unl:[],gone:0},qf:'all',qpick:null,qmem:null,qadd:false,song:{url:'',by:''},songEdit:false,me:'a',tab:'home',day:0,list:'groceries',adding:false,open:null,
   mood:{a:'',b:''},
   events:[],
   lists:{groceries:[],todo:[],bucket:[]},
@@ -857,7 +865,7 @@ function qScene(i){
   return `<div class="stage"><div class="hA">${av('a',4)}</div><div class="hB">${av('b',4)}</div><div class="sl"><div class="in">${spr(["....kkkk....","..kkhhsssskk",".khhsssssssk",".kswksswksSk","ksssssssssSk","kssssdddssSk","kssssssssSSk",".kSSSSSSSSk.","..kkkkkkkk.."],5,{s:'#7BE08A',S:'#4DB35E',d:'#2F7D42',h:'#C8F7CF',w:'#FFFDF5',k:'#2A1F4A'})}</div><i class="pop"></i></div><i class="fb"></i><i class="slash"></i><i class="burst bu1"></i><i class="burst bu2"></i><b class="dmg d1">-12</b><b class="dmg d2">CRIT -24!</b><b class="dmg d3">+8 gold</b></div>`;
 }
 V.quests=()=>{
-  const n=S.q.done.length,avail=qAvail();
+  const nv=S.q.done.length,n=nv+(S.q.gone||0),avail=qAvail();
   const chestReady=Math.floor(n/5)-(S.q.chests||0)>0;
   const say=chestReady?'A treasure chest is waiting for you! Open it below!':S.q.act.length?'You have a quest underway. Go and make a memory!':QSAY[new Date().getDate()%QSAY.length];
   const stars=[[78,16,0],[92,58,.6],[5,160,1.1],[90,150,1.7],[22,176,.3],[72,172,2]].map(([l,t,d])=>`<i class="st" style="left:${l}%;top:${t}px;animation-delay:${d}s"></i>`).join('');
@@ -886,7 +894,7 @@ V.quests=()=>{
   const more=avail.length>6?`<div style="margin-top:10px;text-align:center"><button class="btn px s c-white" data-act="qall">${S.qall?'Show fewer':'Show all '+avail.length+' quests'}</button></div>`:'';
   const form=S.qadd?`<form class="form" id="qform" style="margin-top:22px"><label class="fld" for="qtext"><span>Your own quest</span><input class="pxin px s" id="qtext" type="text" placeholder="Try the new ramen place" required></label><label class="fld" for="qkind"><span>Type</span><select class="pxin px s" id="qkind">${QORDER.map(k=>`<option value="${k}">${QKINDS[k]}</option>`).join('')}</select></label><div class="row" style="gap:12px;flex-wrap:wrap"><button class="btn px s me-${me()}" type="submit">Save quest</button><button class="btn px s c-white" type="button" data-act="qcancel">Cancel</button></div></form>`:`<div class="qlinks" style="margin-top:20px"><button class="link" data-act="qadd">+ Write a new quest</button></div>`;
   const board=`<section class="card px"><p class="eyebrow">${FL(2)}The quest scroll</p>${chips}${avail.length?rows+more:'<div class="muted">This part of the scroll is empty. Write a new quest or try another type.</div>'}${form}</section>`;
-  const log=n?`<section class="card px"><button class="qdrop" data-act="qlog" aria-expanded="${!!S.qlog}"><span class="eyebrow" style="margin:0;border:0;padding:0">${FL(2)}Tales we have written</span><b class="qbadge">${n}</b><span class="qarr ${S.qlog?'open':''}">▾</span></button>${!S.qlog?'':S.q.done.slice().reverse().map(x=>`<div class="qrow"><div class="qt">${esc(x.t)}</div><div class="qsub">${fmtDate(x.date)}</div>${qGallery(x.id)}<div class="qlinks">${qAddLink(x.id)}${S.mems.some(m=>m.qid===x.id)?'<span class="muted" style="font-size:15px">Saved in Memories</span>':`<button class="link" data-act="qtalemem" data-v="${x.id}">Save to Memories</button>`}</div></div>`).join('')}</section>`:'';
+  const log=nv?`<section class="card px"><button class="qdrop" data-act="qlog" aria-expanded="${!!S.qlog}"><span class="eyebrow" style="margin:0;border:0;padding:0">${FL(2)}Tales we have written</span><b class="qbadge">${nv}</b><span class="qarr ${S.qlog?'open':''}">▾</span></button>${!S.qlog?'':S.q.done.slice().reverse().map(x=>`<div class="qrow"><div class="qt">${esc(x.t)}</div><div class="qsub">${fmtDate(x.date)}</div>${qGallery(x.id)}<div class="qlinks">${qAddLink(x.id)}${S.mems.some(m=>m.qid===x.id)?'<span class="muted" style="font-size:15px">Saved in Memories</span>':`<button class="link" data-act="qtalemem" data-v="${x.id}">Save to Memories</button>`}${S.qdelc===x.id?`<span class="muted" style="font-size:15px">Delete this tale?</span><button class="link" data-act="qtdelyes" data-v="${x.id}">Yes, delete</button><button class="link" data-act="qtdelno">Keep</button>`:`<button class="link" data-act="qtdel" data-v="${x.id}">Delete</button>`}</div></div>`).join('')}</section>`:'';
   return `<div class="qw">`+hero+level+prize+memCard+(chestsAvail>0?chest:'')+wheel+pickCard+act+(chestsAvail>0?'':chest)+shelf+board+log+`</div>`;
 };
 function qAct(a,v){
@@ -902,9 +910,9 @@ function qAct(a,v){
     setTimeout(()=>{QSPIN=false;S.qwdeg=target;S.qpick=x.id;render()},el?4150:0);
   }
   else if(a==='qchest'){
-    const avl=Math.floor(S.q.done.length/5)-(S.q.chests||0);if(avl<=0)return;S.q.chests=(S.q.chests||0)+1;
+    const avl=Math.floor((S.q.done.length+(S.q.gone||0))/5)-(S.q.chests||0);if(avl<=0)return;S.q.chests=(S.q.chests||0)+1;
     const k=me(),pool=[];['hat','outfit'].forEach(t=>Object.keys(SHOP[t]||{}).forEach(id=>{if(!S.own[k].includes(t+':'+id))pool.push([t,id])}));
-    const lk=['mm','db'].filter(g=>!(S.q.unl||[]).includes(g));
+    const lk=['mm','db','rv','ch'].filter(g=>!(S.q.unl||[]).includes(g));
     if(lk.length&&Math.random()<.4){const g=lk[Math.floor(Math.random()*lk.length)];S.q.unl=(S.q.unl||[]).concat(g);S.qprize='You unlocked a new game: '+TITLES[g]+'! Find it in More, under Games.';toast('New game unlocked!')}
     else if(pool.length&&Math.random()<.35){const [t,id]=pool[Math.floor(Math.random()*pool.length)];S.own[k].push(t+':'+id);S.qprize='You found: '+itemName(t,id)+'! It is in your Shop now.';toast('Treasure!')}
     else{const c=[20,30,30,40,50][Math.floor(Math.random()*5)];S.coins[k]+=c;S.cl.unshift({k,n:c,why:'Treasure chest'});S.cl=S.cl.slice(0,30);S.qprize='+'+c+' coins!';toast('Treasure!')}
@@ -924,6 +932,9 @@ function qAct(a,v){
   else if(a==='qcancel'){S.qadd=false}
   else if(a==='qdel'){q.mine=q.mine.filter(x=>x.id!==v)}
   else if(a==='qlog'){S.qlog=!S.qlog}
+  else if(a==='qtdel'){S.qdelc=v}
+  else if(a==='qtdelno'){S.qdelc=null}
+  else if(a==='qtdelyes'){if(q.done.some(y=>y.id===v)){q.done=q.done.filter(y=>y.id!==v);q.gone=(q.gone||0)+1;toast('Tale deleted')}S.qdelc=null}
   else if(a==='qscene'){S.qsc=((S.qsc==null?QSC0:S.qsc)+1)%3}
 }
 V.home=()=>{
@@ -1269,11 +1280,11 @@ document.addEventListener('click',e=>{
     const h=document.createElement('span');h.className='floath';h.innerHTML=spr(SP.heart,3);const r=el.getBoundingClientRect(),q=sc.getBoundingClientRect();h.style.left=(r.left-q.left+r.width/2-9)+'px';h.style.top=(r.top-q.top-6)+'px';sc.appendChild(h);setTimeout(()=>h.remove(),1100);return}
   if(a.startsWith('shop-')){shopAct(a,v);render();return}
   if(a.startsWith('tet-')){teAct(a);return}
-  if(/^(ttt|c4|pz|uno|mm|db)-/.test(a)){gAct(a,v);render();return}
-  if(a==='game'){if((v==='mm'||v==='db')&&!(S.q.unl||[]).includes(v)){toast('Still locked. Find it in a treasure chest!');return}if(v==='sudoku'&&!S.su)suNew('easy');if(v==='scrabble'&&!S.sc)scNew();gOpen(v);S.tab=v;window.scrollTo(0,0);render();return}
+  if(/^(ttt|c4|mm|db|rv|ch)-/.test(a)){gAct(a,v);render();return}
+  if(a==='game'){if(['mm','db','rv','ch'].includes(v)&&!(S.q.unl||[]).includes(v)){toast('Still locked. Find it in a treasure chest!');return}if(v==='sudoku'&&!S.su)suNew('easy');if(v==='scrabble'&&!S.sc)scNew();gOpen(v);S.tab=v;window.scrollTo(0,0);render();return}
   if(a==='tab'){S.tab=v;S.adding=false;S.madd=false;S.mphoto=null;S.mphotos=[];S.mpe=null;S.qpe=null;S.confirm=null;S.eadd=false;S.gadd=false;S.cdel=null;S.gdel=null;S.ledit=null;S.evedit=null;S.evdel=null;window.scrollTo(0,0)}
   else if(a==='mood'){S.mood[me()]=v;const td=todayIso();if(S.moodDay[me()]!==td){S.moodDay[me()]=td;earn(2,'Mood shared')}}
-  else if(a&&a[0]==='q'&&/^q(f|all|pe|talemem|phdel|spin|chest|prizeok|rand|take|drop|done|plan|memyes|memno|add|cancel|del|log|scene)$/.test(a)){qAct(a,v)}
+  else if(a&&a[0]==='q'&&/^q(f|all|pe|talemem|phdel|spin|chest|prizeok|rand|take|drop|done|plan|memyes|memno|add|cancel|del|log|scene|tdel|tdelyes|tdelno)$/.test(a)){qAct(a,v)}
   else if(a==='music'){musicToggle();return}
   else if(a==='songedit'){S.songEdit=true;render();return}
   else if(a==='songcancel'){S.songEdit=false;render();return}
@@ -1509,8 +1520,6 @@ V.more=()=>`<section class="card px"><p class="eyebrow">${FL(2)}Us</p>
   <button class="res" data-act="game" data-v="scrabble">${spr(SP.tile,3)}<span class="grow"><b>Scrabble</b><span class="muted" style="display:block;font-size:14px">Two players take turns. Words are checked for you.</span></span></button>
   <button class="res" data-act="game" data-v="ttt">${spr(SP.ttt,3)}<span class="grow"><b>Tic-tac-toe</b><span class="muted" style="display:block;font-size:14px">Quick rounds. Win for +3 coins.</span></span></button>
   <button class="res" data-act="game" data-v="c4">${spr(SP.c4,3)}<span class="grow"><b>Connect 4</b><span class="muted" style="display:block;font-size:14px">Drop discs, line up four. Win for +4 coins.</span></span></button>
-  <button class="res" data-act="game" data-v="puzzle">${spr(SP.pz,3)}<span class="grow"><b>Picture puzzle</b><span class="muted" style="display:block;font-size:14px">Slide the pieces back together. +8 coins.</span></span></button>
-  <button class="res" data-act="game" data-v="uno">${spr(SP.uno,3)}<span class="grow"><b>Uno</b><span class="muted" style="display:block;font-size:14px">Two players, your own hidden hand. Win for +6 coins.</span></span></button>
   <button class="res" data-act="game" data-v="tetris">${spr(SP.tet,3)}<span class="grow"><b>Tetris</b><span class="muted" style="display:block;font-size:14px">Stack blocks, clear lines. Up to +15 coins.</span></span></button>${gameRows()}
 </section>
 <section class="card px"><p class="eyebrow">${FL(2)}More</p>
@@ -1519,7 +1528,7 @@ V.more=()=>`<section class="card px"><p class="eyebrow">${FL(2)}Us</p>
 </section>
 <section class="card px"><p class="eyebrow">${FL(2)}Room to grow</p><div class="muted">More features can live here later, such as reminders, important dates, recurring bills, chores or a trip planner.</div></section>`;
 /* ---------- games: Sudoku and Scrabble ---------- */
-const GAMES=['quests','mm','db','ttt','c4','puzzle','uno','tetris','sudoku','scrabble','shop','customize','search','settings'];
+const GAMES=['quests','mm','db','rv','ch','ttt','c4','tetris','sudoku','scrabble','shop','customize','search','settings'];
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 SP.sudoku=["kkkkkkkkkk","kwwkcckwwk","kwwkwwkbbk","kkkkkkkkkk","kbbkwwkwwk","kwwkwwkccx","kkkkkkkkkk","kwwkccdwwk","kwwkwwkwwk","kkkkkkkkkk"].map(r=>r.replace(/[xd]/g,'k'));
 SP.tile=["kkkkkkkk","kyyyyyyk","kyykkyyk","kykyykyk","kykkkkyk","kykyykyk","kykyykyk","kyyyyyyk","kkkkkkkk"];
@@ -1827,8 +1836,8 @@ V.shop=()=>{
   <div class="row" style="flex-wrap:wrap"><button class="btn px s c-gold" data-act="customize">Customize characters</button><button class="btn px s c-white" data-act="tab" data-v="more">Back to More</button></div>`;
 };
 
-/* ---------- more games: tic-tac-toe, connect 4, puzzle, uno, tetris ---------- */
-S.gs={ttt:{a:0,b:0},c4:{a:0,b:0},uno:{a:0,b:0},tet:{a:0,b:0},pz:{a:0,b:0},mm:{a:0,b:0},db:{a:0,b:0}};S.gm={};
+/* ---------- more games: tic-tac-toe, connect 4, tetris ---------- */
+S.gs={ttt:{a:0,b:0},c4:{a:0,b:0},tet:{a:0,b:0},mm:{a:0,b:0},db:{a:0,b:0},rv:{a:0,b:0},ch:{a:0,b:0}};S.gm={};
 SP.ttt=["kkkkkkkkkk","kwwkwwkwwk","kckkwkkbbk","kwwkcwkwwk","kkkkkkkkkk","kwwkwwkwwk","kwkkcckwwk","kwwkwwkwwk","kkkkkkkkkk"];
 SP.c4=["kkkkkkkkkk","kwwwwwwwwk","kwcwwwwbwk","kwcwwbwbwk","kwcwcbwcwk","kkkkkkkkkk"];
 SP.pz=["kkkkkkkkkk","kccckbbbkk","kccckbbbkk","kgggkyyykk","kgggkyyykk","kkkkkkkkkk"];
@@ -1843,10 +1852,10 @@ function gOpen(v){
   const m=S.gm;
   if(v==='ttt'&&!m.ttt)tNew();
   if(v==='c4'&&!m.c4)cNew();
-  if(v==='puzzle'&&!m.pz)pNew(3);
-  if(v==='uno'&&!m.uno)uNew();
   if(v==='mm'&&!m.mm)mNew();
   if(v==='db'&&!m.db)dNew();
+  if(v==='rv'&&!m.rv)rvNew();
+  if(v==='ch'&&!m.ch)chNew();
   if(v==='tetris')teNew();
 }
 /* tic-tac-toe */
@@ -1879,69 +1888,6 @@ V.c4=()=>{
   <section class="card px">${t.over?`<div class="turn px s c-gold"><b>${msg}</b></div>`:turnBar(t.turn)}<div class="c4g">${cells}</div>
   ${tally('c4')}${gfoot('c4-new','New round')}</section>`;
 };
-/* sliding picture puzzle */
-function pNew(n){
-  const t=Array.from({length:n*n},(_,i)=>i);let e=n*n-1;
-  for(let k=0;k<n*n*30;k++){const r=(e/n)|0,c=e%n,opts=[];if(r>0)opts.push(e-n);if(r<n-1)opts.push(e+n);if(c>0)opts.push(e-1);if(c<n-1)opts.push(e+1);const j=opts[Math.floor(Math.random()*opts.length)];[t[e],t[j]]=[t[j],t[e]];e=j}
-  S.gm.pz={n,t,moves:0,done:false,paid:false};
-}
-function pzImg(){
-  const a=av('a',8).replace('<svg class="spr"','<svg x="22" y="70"'),b=av('b',8).replace('<svg class="spr"','<svg x="122" y="70"');
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" shape-rendering="crispEdges"><rect width="240" height="240" fill="#CDE9F9"/><rect y="170" width="240" height="70" fill="#7BC67B"/><rect x="170" y="24" width="36" height="36" fill="#F6C453"/><rect x="20" y="40" width="50" height="14" fill="#fff"/><rect x="30" y="30" width="30" height="14" fill="#fff"/>${a}${b}<rect x="100" y="200" width="8" height="8" fill="#F4978E"/><rect x="190" y="205" width="8" height="8" fill="#FFC2D1"/><rect x="60" y="215" width="8" height="8" fill="#F6C453"/></svg>`;
-  return "url('data:image/svg+xml;utf8,"+encodeURIComponent(svg).replace(/'/g,'%27')+"')";
-}
-V.puzzle=()=>{
-  const z=S.gm.pz,n=z.n,img=pzImg();
-  const tiles=z.t.map((v,i)=>{
-    if(v===n*n-1&&!z.done)return `<span class="pt empty"></span>`;
-    const r=(v/n)|0,c=v%n,pos=n>1?`${c*100/(n-1)}% ${r*100/(n-1)}%`:'0 0';
-    return `<button class="pt" data-act="pz-move" data-v="${i}" style="background-image:${img};background-size:${n*100}% ${n*100}%;background-position:${pos}" aria-label="Piece ${v+1}"></button>`;
-  }).join('');
-  return `${gTitle('Picture puzzle','Slide the pieces to put your bunny and bear back together.')}
-  <section class="card px">${z.done?`<div class="turn px s c-gold"><b>Solved in ${z.moves} moves!</b></div>`:`<div class="turn px s c-white"><b>Moves: ${z.moves}</b></div>`}
-  <div class="pzg" style="grid-template-columns:repeat(${n},1fr)">${tiles}</div>
-  <div class="row" style="flex-wrap:wrap"><button class="btn px s ${n===3?'c-gold':'c-white'}" data-act="pz-new" data-v="3">Easy 3 x 3</button><button class="btn px s ${n===4?'c-gold':'c-white'}" data-act="pz-new" data-v="4">Hard 4 x 4</button>${backBtn}</div></section>`;
-};
-/* uno */
-const UC={r:['Red','#E0455A'],y:['Yellow','#F6C453'],g:['Green','#4E9E57'],b:['Blue','#5FA6D8']};
-function uNew(){
-  const d=[];
-  for(const c of 'rygb'){d.push(c+'0');for(let n=1;n<=9;n++)d.push(c+n,c+n);for(const s of ['S','D'])d.push(c+s,c+s)}
-  for(let i=0;i<4;i++)d.push('W','F');
-  shuf(d);
-  const hands={a:d.splice(0,7),b:d.splice(0,7)};
-  let top;do{top=d.shift();if(top[0]==='W'||top[0]==='F'||top[1]==='S'||top[1]==='D'){d.push(top);top=null}}while(!top);
-  S.gm.uno={hands,draw:d,disc:[top],color:top[0],turn:'a',pick:false,over:false,msg:''};
-}
-const uOk=(u,c)=>c==='W'||c==='F'||c[0]===u.color||c[1]===u.disc[u.disc.length-1][1];
-function uDraw(u,k,n){for(let i=0;i<n;i++){if(!u.draw.length){const top=u.disc.pop();u.draw=shuf(u.disc.map(c=>c));u.disc=[top]}if(u.draw.length)u.hands[k].push(u.draw.shift())}}
-const uLabel=c=>c==='W'?'Wild':c==='F'?'+4':c[1]==='S'?'Skip':c[1]==='D'?'+2':c[1];
-const uCard=(c,cls,attr)=>{const col=c[0]==='W'||c[0]==='F'?'#3E3A57':UC[c[0]][1];return `<button class="uc ${cls||''}" style="background:${col};color:${c[0]==='y'?'#3E2619':'#fff'}" ${attr||''}><b>${uLabel(c)}</b></button>`};
-V.uno=()=>{
-  const u=S.gm.uno,k=me(),o=other(),top=u.disc[u.disc.length-1],mine=u.turn===k&&!u.over;
-  const hand=u.hands[k].map((c,i)=>uCard(c,mine&&uOk(u,c)?'ok':'no',`data-act="uno-play" data-v="${i}"`)).join('');
-  const status=u.over?`<div class="turn px s c-gold"><b>${esc(P[u.turn].name)} wins!</b></div>`:turnBar(u.turn);
-  return `${gTitle('Uno','Match the colour or the number. First to empty their hand wins.')}
-  <section class="card px">${status}${u.msg?`<div class="muted">${esc(u.msg)}</div>`:''}
-  <div class="row" style="gap:14px;justify-content:center;flex-wrap:wrap"><div class="ucol"><span class="muted">${esc(P[o].name)}: ${u.hands[o].length} cards</span></div>
-  <div class="ucol">${uCard(top,'big')}<span class="muted">Colour: ${UC[u.color][0]}</span></div>
-  <div class="ucol"><button class="uc back ${mine?'ok':'no'}" data-act="uno-draw"><b>Draw</b></button><span class="muted">${u.draw.length} left</span></div></div>
-  ${u.pick?`<p class="eyebrow">Pick a colour</p><div class="row" style="flex-wrap:wrap">${Object.entries(UC).map(([c,[n,h]])=>`<button class="btn px s" style="background:${h};color:${c==='y'?'#3E2619':'#fff'}" data-act="uno-color" data-v="${c}">${n}</button>`).join('')}</div>`:''}
-  <p class="eyebrow">${esc(P[k].name)}'s hand</p><div class="uhand">${hand}</div>
-  ${tally('uno')}${gfoot('uno-new','New game')}</section>`;
-};
-function uEnd(u){
-  const k=u.turn;u.over=true;S.gs.uno[k]++;
-  if(k===me())earn(6,'Uno win');else{S.coins[k]+=6;S.cl.unshift({k,n:6,why:'Uno win'})}
-}
-function uAfter(u,c,chosen){
-  const k=u.turn,o=P[k].other;u.msg='';
-  if(!u.hands[k].length){uEnd(u);return}
-  u.turn=o;
-  if(c[1]==='S'){u.turn=k;u.msg=P[o].name+' misses a turn.'}
-  if(c[1]==='D'){uDraw(u,o,2);u.turn=k;u.msg=P[o].name+' draws 2 and misses a turn.'}
-  if(c==='F'){uDraw(u,o,4);u.turn=k;u.msg=P[o].name+' draws 4 and misses a turn.'}
-}
 /* tetris */
 const TP={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[0,1,0],[1,1,1]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 const TCOL={I:'#8EC9F0',O:'#F6C453',T:'#C9A6E8',S:'#7BC67B',Z:'#F4978E',J:'#5FA6D8',L:'#E8A55A'};
@@ -2008,7 +1954,7 @@ SP.mm=["kkkkkkkkkk","kyyykrrrkk","kyyykrrrkk","kyyykrrrkk","kkkkkkkkkk"];
 SP.db=["kkkkkkkkk","k...k...k","k...k...k","kkkkkkkkk","k...k...k","k...k...k","kkkkkkkkk"];
 const MMI=['star','chest','tile','ttt','c4','pz','uno','tet'];
 const gsw=g=>(S.gs[g]=S.gs[g]||{a:0,b:0});
-const gameRows=()=>[['mm','Memory match','Find the pairs. Match two and go again. Win for +4 coins.'],['db','Dots and boxes','Draw lines, close boxes, take another turn. Win for +5 coins.']].map(([g,n,d])=>(S.q.unl||[]).includes(g)?`<button class="res" data-act="game" data-v="${g}">${spr(SP[g],3)}<span class="grow"><b>${n}</b><span class="muted" style="display:block;font-size:14px">${d}</span></span></button>`:`<div class="res" style="opacity:.6;cursor:default" aria-disabled="true">${spr(SP.chest,3)}<span class="grow"><b>${n}</b><span class="muted" style="display:block;font-size:14px">Locked. It is hiding in a treasure chest. Finish quests to find it.</span></span></div>`).join('');
+const gameRows=()=>[['mm','Memory match','Find the pairs. Match two and go again. Win for +4 coins.'],['db','Dots and boxes','Draw lines, close boxes, take another turn. Win for +5 coins.'],['rv','Reversi','Trap your partner\'s discs between yours to flip them. Win for +5 coins.'],['ch','Chess','The classic game for two. Checkmate wins +6 coins.']].map(([g,n,d])=>(S.q.unl||[]).includes(g)?`<button class="res" data-act="game" data-v="${g}">${spr(SP[g],3)}<span class="grow"><b>${n}</b><span class="muted" style="display:block;font-size:14px">${d}</span></span></button>`:`<div class="res" style="opacity:.6;cursor:default" aria-disabled="true">${spr(SP.chest,3)}<span class="grow"><b>${n}</b><span class="muted" style="display:block;font-size:14px">Locked. It is hiding in a treasure chest. Finish quests to find it.</span></span></div>`).join('');
 function mNew(){S.gm.mm={c:shuf([...MMI,...MMI]),open:[],own:Array(16).fill(''),turn:S.gm.mm?other():'a',over:false}}
 function dNew(){S.gm.db={h:Array(20).fill(''),v:Array(20).fill(''),bx:Array(16).fill(''),turn:S.gm.db?other():'a',over:false}}
 function mmFix(t){if(t.open.length===2){t.open=[];t.turn=P[t.turn].other}}
@@ -2029,6 +1975,67 @@ V.db=()=>{
   const w=t.over?(sc('a')===sc('b')?'A draw. Nicely played.':P[sc('a')>sc('b')?'a':'b'].name+' wins!'):'';
   return `${gTitle('Dots and boxes','Draw a line between two dots. Close a box to claim it and go again.')}
   <section class="card px">${t.over?`<div class="turn px s c-gold"><b>${esc(w)}</b></div>`:turnBar(t.turn,'<span class="muted">'+sc('a')+' - '+sc('b')+'</span>')}<div class="dgrid">${g}</div>${tally('db')}${gfoot('db-new','New round')}</section>`;
+};
+/* Reversi and Chess */
+SP.rv=["kkkkkkkk","kggggggk","kgrbgggk","kgbrgggk","kggggggk","kkkkkkkk"];
+SP.ch=["...kk...","..kyyk..","..kyyk..","...kk...","..kyyk..",".kyyyyk.","kkkkkkkk"];
+const rvNew=()=>{const b=Array(64).fill('');b[27]=b[36]='b';b[28]=b[35]='a';S.gm.rv={b,turn:S.gm.rv?other():'a',over:false,msg:''}};
+const rvFlips=(b,i,k)=>{if(b[i])return[];const o=k==='a'?'b':'a',r0=i>>3,c0=i&7,out=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;let r=r0+dr,c=c0+dc;const run=[];while(r>=0&&r<8&&c>=0&&c<8&&b[r*8+c]===o){run.push(r*8+c);r+=dr;c+=dc}if(run.length&&r>=0&&r<8&&c>=0&&c<8&&b[r*8+c]===k)out.push(...run)}return out};
+const rvAny=(b,k)=>b.some((x,i)=>!x&&rvFlips(b,i,k).length);
+function rvNext(t){const o=P[t.turn].other;t.msg='';
+  if(rvAny(t.b,o))t.turn=o;
+  else if(rvAny(t.b,t.turn))t.msg=P[o].name+' has no move, so '+P[t.turn].name+' goes again.';
+  else{t.over=true;const a2=t.b.filter(x=>x==='a').length,b2=t.b.filter(x=>x==='b').length;if(a2!==b2){const w=a2>b2?'a':'b';gsw('rv')[w]++;earn(5,'Reversi win',w)}}}
+V.rv=()=>{
+  const t=S.gm.rv,k=me(),n=c=>t.b.filter(x=>x===c).length;gsw('rv');
+  const cells=t.b.map((c,i)=>{const hint=!t.over&&t.turn===k&&!c&&rvFlips(t.b,i,k).length;return `<button class="rc" data-act="rv-move" data-v="${i}" aria-label="Square ${i+1}${c?' '+P[c].name:''}">${c?`<span class="rd ${c}"></span>`:hint?'<span class="rh"></span>':''}</button>`}).join('');
+  const w=t.over?(n('a')===n('b')?'A draw. Nicely played.':P[n('a')>n('b')?'a':'b'].name+' wins!'):'';
+  return `${gTitle('Reversi','Place a disc so it traps your partner\'s discs in a line. Trapped discs flip. Most discs wins.')}
+  <section class="card px">${t.over?`<div class="turn px s c-gold"><b>${esc(w)}</b></div>`:turnBar(t.turn,'<span class="muted">'+n('a')+' - '+n('b')+'</span>')}${t.msg?`<div class="muted ghint">${esc(t.msg)}</div>`:''}<div class="rg">${cells}</div>${tally('rv')}${gfoot('rv-new','New round')}</section>`;
+};
+/* chess: capitals are the bunny's pieces (move first), small letters are the bear's */
+const CHN=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]],CHK=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]],chIn=(r,c)=>r>=0&&r<8&&c>=0&&c<8,isW=p=>p===p.toUpperCase();
+let chSel=-1;
+const chNew=()=>{S.gm.ch={b:'rnbqkbnr'.split('').concat(Array(8).fill('p'),Array(32).fill(''),Array(8).fill('P'),'RNBQKBNR'.split('')),turn:S.gm.ch?other():'a',cr:'KQkq',ep:-1,chk:false,over:false,win:''};chSel=-1};
+function chAtk(b,sq,w){const r0=sq>>3,c0=sq&7,g=(x,y)=>w?x:y,pr=r0+(w?1:-1);
+  for(const dc of[-1,1])if(chIn(pr,c0+dc)&&b[pr*8+c0+dc]===g('P','p'))return true;
+  for(const[dr,dc]of CHN)if(chIn(r0+dr,c0+dc)&&b[(r0+dr)*8+c0+dc]===g('N','n'))return true;
+  for(const[dr,dc]of CHK)if(chIn(r0+dr,c0+dc)&&b[(r0+dr)*8+c0+dc]===g('K','k'))return true;
+  for(const[dr,dc]of CHK){const dg=dr&&dc;let r=r0+dr,c=c0+dc;while(chIn(r,c)){const x=b[r*8+c];if(x){if(x===g('Q','q')||x===(dg?g('B','b'):g('R','r')))return true;break}r+=dr;c+=dc}}
+  return false}
+function chPseudo(t,f){const b=t.b,p=b[f],w=isW(p),r0=f>>3,c0=f&7,out=[],T=p.toLowerCase(),own=x=>x&&isW(x)===w,foe=x=>x&&isW(x)!==w;
+  const add=(r,c)=>{if(!chIn(r,c))return false;const x=b[r*8+c];if(own(x))return false;out.push(r*8+c);return !x};
+  if(T==='p'){const d=w?-1:1,st=w?6:1;if(chIn(r0+d,c0)&&!b[(r0+d)*8+c0]){out.push((r0+d)*8+c0);if(r0===st&&!b[(r0+2*d)*8+c0])out.push((r0+2*d)*8+c0)}
+    for(const dc of[-1,1]){const r=r0+d,c=c0+dc;if(chIn(r,c)&&(foe(b[r*8+c])||r*8+c===t.ep))out.push(r*8+c)}}
+  else if(T==='n')CHN.forEach(([dr,dc])=>add(r0+dr,c0+dc));
+  else if(T==='k'){CHK.forEach(([dr,dc])=>add(r0+dr,c0+dc));const hr=w?7:0,R=w?'R':'r',cr=t.cr,h=hr*8;
+    if(f===h+4&&!chAtk(b,f,!w)){
+      if(cr.includes(w?'K':'k')&&b[h+7]===R&&!b[h+5]&&!b[h+6]&&!chAtk(b,h+5,!w)&&!chAtk(b,h+6,!w))out.push(h+6);
+      if(cr.includes(w?'Q':'q')&&b[h]===R&&!b[h+1]&&!b[h+2]&&!b[h+3]&&!chAtk(b,h+3,!w)&&!chAtk(b,h+2,!w))out.push(h+2)}}
+  else{const dirs=T==='r'?CHK.slice(0,4):T==='b'?CHK.slice(4):CHK;dirs.forEach(([dr,dc])=>{let r=r0+dr,c=c0+dc;while(add(r,c)){r+=dr;c+=dc}})}
+  return out}
+function chDo(t,f,to){const b=t.b,p=b[f],w=isW(p),T=p.toLowerCase(),r0=f>>3,r1=to>>3,c0=f&7,c1=to&7;
+  if(T==='p'&&c0!==c1&&!b[to])b[r0*8+c1]='';
+  b[to]=p;b[f]='';
+  if(T==='p'&&(r1===0||r1===7))b[to]=w?'Q':'q';
+  if(T==='k'&&Math.abs(c1-c0)===2){if(c1>c0){b[r0*8+5]=b[r0*8+7];b[r0*8+7]=''}else{b[r0*8+3]=b[r0*8];b[r0*8]=''}}
+  t.ep=T==='p'&&Math.abs(r1-r0)===2?(f+to)/2:-1;
+  let cr=t.cr;if(T==='k')cr=cr.replace(w?/[KQ]/g:/[kq]/g,'');
+  [[56,'Q'],[63,'K'],[0,'q'],[7,'k']].forEach(([q,ch])=>{if(f===q||to===q)cr=cr.replace(ch,'')});t.cr=cr}
+function chLegal(t,f){const w=isW(t.b[f]),K=w?'K':'k';return chPseudo(t,f).filter(to=>{const u={b:t.b.slice(),cr:t.cr,ep:t.ep};chDo(u,f,to);return !chAtk(u.b,u.b.indexOf(K),!w)})}
+const chAny=(t,w)=>t.b.some((p,i)=>p&&isW(p)===w&&chLegal(t,i).length);
+function chNext(t){const w=t.turn==='a',nw=!w;t.turn=nw?'a':'b';t.chk=chAtk(t.b,t.b.indexOf(nw?'K':'k'),w);
+  if(!chAny(t,nw)){t.over=true;if(t.chk){t.win=w?'a':'b';gsw('ch')[t.win]++;earn(6,'Chess win',t.win)}else t.win=''}}
+const CHG={k:'\u265A',q:'\u265B',r:'\u265C',b:'\u265D',n:'\u265E',p:'\u265F'};
+V.ch=()=>{
+  const t=S.gm.ch,k=me(),w=k==='a';gsw('ch');
+  const sel=!t.over&&t.turn===k&&chSel>=0&&t.b[chSel]&&isW(t.b[chSel])===w?chSel:-1,mv=sel>=0?chLegal(t,sel):[];
+  const ord=[...Array(64).keys()];if(!w)ord.reverse();
+  const cells=ord.map(i=>{const p=t.b[i],lt=((i>>3)+(i&7))%2===0,h=mv.includes(i);
+    return `<button class="sq ${lt?'l':'d'}${i===sel?' sel':''}${h?' hint'+(p?' cap':''):''}" data-act="ch-tap" data-v="${i}" aria-label="Square ${'abcdefgh'[i&7]}${8-(i>>3)}${p?' '+p:''}">${p?`<span class="pc ${isW(p)?'':'b'}">${CHG[p.toLowerCase()]}\uFE0E</span>`:''}</button>`}).join('');
+  const msg=t.over?(t.win?P[t.win].name+' wins by checkmate!':'Stalemate. A draw.'):'';
+  return `${gTitle('Chess','Tap a piece, then where it should go. '+esc(P.a.name)+' plays coral and moves first, '+esc(P.b.name)+' plays blue. Pawns promote to a queen.')}
+  <section class="card px">${t.over?`<div class="turn px s c-gold"><b>${esc(msg)}</b></div>`:turnBar(t.turn,t.chk?'<b style="color:#C0483F">Check!</b>':'')}<div class="bg8">${cells}</div>${tally('ch')}${gfoot('ch-new','New game')}</section>`;
 };
 /* actions for the board games */
 function gAct(a,v){
@@ -2055,6 +2062,13 @@ function gAct(a,v){
     else if(!n)t.turn=other();
     return;
   }
+  if(a==='rv-new'){rvNew();return}
+  if(a==='rv-move'){const t=m.rv,i=+v;if(!mine(t)||t.b[i])return;const f=rvFlips(t.b,i,k);if(!f.length){toast('That spot would not flip anything');return}t.b[i]=k;f.forEach(j=>{t.b[j]=k});rvNext(t);return}
+  if(a==='ch-new'){chNew();return}
+  if(a==='ch-tap'){const t=m.ch,i=+v;if(t.over)return;if(t.turn!==k){toast('Waiting for '+P[t.turn].name);return}
+    const p=t.b[i],w=k==='a';
+    if(chSel>=0&&chLegal(t,chSel).includes(i)){chDo(t,chSel,i);chSel=-1;chNext(t);return}
+    chSel=p&&isW(p)===w?i:-1;return}
   if(a==='ttt-new'){tNew();return}
   if(a==='ttt-move'){
     const t=m.ttt,i=+v;if(!mine(t)||t.b[i])return;
@@ -2069,29 +2083,6 @@ function gAct(a,v){
     const i=r*7+x;t.b[i]=k;const l=c4win(t.b,i);
     if(l){t.win=l;t.over=true;win('c4');earn(4,'Connect 4 win')}else if(t.b.every(c=>c))t.over=true;else t.turn=other();
     return;
-  }
-  if(a==='pz-new'){pNew(+v);return}
-  if(a==='pz-move'){
-    const z=m.pz,n=z.n,i=+v;if(z.done)return;
-    const e=z.t.indexOf(n*n-1),r=(i/n)|0,c=i%n,er=(e/n)|0,ec=e%n;
-    if(Math.abs(r-er)+Math.abs(c-ec)!==1)return;
-    [z.t[i],z.t[e]]=[z.t[e],z.t[i]];z.moves++;
-    if(z.t.every((x,j)=>x===j)){z.done=true;if(!z.paid){z.paid=true;earn(8,'Puzzle solved')}}
-    return;
-  }
-  if(a==='uno-new'){uNew();return}
-  const u=m.uno;
-  if(a==='uno-color'){u.color=v;u.pick=false;uAfter(u,u.disc[u.disc.length-1]);return}
-  if(a==='uno-play'){
-    if(u.over||u.pick)return;if(u.turn!==k){toast('Waiting for '+P[u.turn].name);return}
-    const c=u.hands[k][+v];if(!c)return;if(!uOk(u,c)){toast('That card does not match');return}
-    u.hands[k].splice(+v,1);u.disc.push(c);
-    if(c==='W'||c==='F'){if(!u.hands[k].length){uEnd(u);return}u.pick=true;return}
-    u.color=c[0];uAfter(u,c);return;
-  }
-  if(a==='uno-draw'){
-    if(u.over||u.pick)return;if(u.turn!==k){toast('Waiting for '+P[u.turn].name);return}
-    uDraw(u,k,1);u.turn=other();u.msg=P[k].name+' drew a card.';return;
   }
 }
 
@@ -2121,7 +2112,7 @@ const backupObj=()=>({app:'Our Nook',version:1,saved:new Date().toISOString(),na
 function restoreBackup(txt){
   try{
     const d=JSON.parse(txt);if(!d||d.app!=='Our Nook')return false;
-    if(d.q&&Array.isArray(d.q.done))S.q={done:d.q.done,act:d.q.act||[],mine:d.q.mine||[],chests:d.q.chests||0,unl:d.q.unl||[]};
+    if(d.q&&Array.isArray(d.q.done))S.q={done:d.q.done,act:d.q.act||[],mine:d.q.mine||[],chests:d.q.chests||0,unl:d.q.unl||[],gone:d.q.gone||0};
     ['events','mems','exp','goals','sav','inc'].forEach(k=>{if(Array.isArray(d[k]))S[k]=d[k]});
     if(d.lists&&typeof d.lists==='object')S.lists=d.lists;
     if(d.mood&&typeof d.mood==='object')S.mood=d.mood;
@@ -2212,7 +2203,7 @@ const JS=v=>JSON.stringify(v,(k,x)=>x instanceof Set?undefined:x);
 const LOCAL_KEYS={sc:{pend:{},sel:-1,zoom:false,blank:null,warn:null,swap:null,confirm:false},su:{sel:-1,pencil:false,confirm:false,showErr:false,hist:[]}};
 function gamesOut(){
   const o={};
-  [['sc',S.sc],['su',S.su],['ttt',S.gm.ttt],['c4',S.gm.c4],['pz',S.gm.pz],['uno',S.gm.uno],['mm',S.gm.mm],['db',S.gm.db]].forEach(([k,v])=>{
+  [['sc',S.sc],['su',S.su],['ttt',S.gm.ttt],['c4',S.gm.c4],['mm',S.gm.mm],['db',S.gm.db],['rv',S.gm.rv],['ch',S.gm.ch]].forEach(([k,v])=>{
     if(!v)return;const c=Object.assign({},v);Object.keys(LOCAL_KEYS[k]||{}).forEach(x=>delete c[x]);o[k]=c;
   });
   o.gs=S.gs;return o;
@@ -2222,7 +2213,7 @@ function gamesIn(o){
   const merge=(k,cur)=>{const n=Object.assign({},o[k]),loc=LOCAL_KEYS[k]||{};Object.keys(loc).forEach(x=>{n[x]=cur&&x in cur?cur[x]:loc[x]});return n};
   if(o.sc)S.sc=merge('sc',S.sc);
   if(o.su)S.su=merge('su',S.su);
-  ['ttt','c4','pz','uno','mm','db'].forEach(k=>{if(o[k])S.gm[k]=o[k]});
+  ['ttt','c4','mm','db','rv','ch'].forEach(k=>{if(o[k])S.gm[k]=o[k]});
   if(o.gs)S.gs=Object.assign({},S.gs,o.gs);
 }
 const SLICES={
@@ -2231,7 +2222,7 @@ const SLICES={
   lists:{path:()=>'shared/lists',out:()=>S.lists,inn:v=>{S.lists=Object.assign({groceries:[],todo:[],bucket:[]},v||{})}},
   profile:{path:()=>'shared/profile',out:()=>({names:{a:P.a.name,b:P.b.name},appName:S.appName,chars:S.chars}),
     inn:v=>{if(!v)return;if(v.names){P.a.name=v.names.a||P.a.name;P.b.name=v.names.b||P.b.name}if(v.appName)S.appName=v.appName;if(v.chars&&v.chars.a&&v.chars.b)S.chars=v.chars}},
-  quests:{path:()=>'shared/quests',out:()=>S.q,inn:v=>{S.q={done:(v&&v.done)||[],act:(v&&v.act)||[],mine:(v&&v.mine)||[],chests:(v&&v.chests)||0,unl:(v&&v.unl)||[]}}},
+  quests:{path:()=>'shared/quests',out:()=>S.q,inn:v=>{S.q={done:(v&&v.done)||[],act:(v&&v.act)||[],mine:(v&&v.mine)||[],chests:(v&&v.chests)||0,unl:(v&&v.unl)||[],gone:(v&&v.gone)||0}}},
   games:{path:()=>'shared/games',out:gamesOut,inn:gamesIn},
   money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav,inc:S.M[S.me].inc}),
     inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[],inc:v.inc||[]}}}
