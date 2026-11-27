@@ -82,6 +82,7 @@
 .sq.hint::after{content:"";position:absolute;width:28%;height:28%;border-radius:50%;background:rgba(91,74,122,.38)}.sq.hint.cap::after{width:86%;height:86%;background:none;border:3px solid rgba(91,74,122,.5)}
 .pc{color:#F4978E;text-shadow:1px 0 #5B4A7A,-1px 0 #5B4A7A,0 1px #5B4A7A,0 -1px #5B4A7A;position:relative;z-index:1}.pc.b{color:#8EC9F0}
 .ent.by-a{--edge:#DE7B72}.ent.by-b{--edge:#5FA6D8}
+.gpic{display:block;width:100%;max-height:200px;object-fit:cover;margin-bottom:10px;border:3px solid var(--ink)}
 </style>
 <title>Our Nook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -710,7 +711,7 @@ const S={mbin:[],mbinopen:false,mbc:null,mundo:null,qall:false,mpe:null,qpe:null
   gadd:false,gkind:'travel',cdel:null,gdel:null,nid:100
 };
 /* money is private: each person only ever sees their own */
-S.M={a:{exp:[],goals:[],sav:[],inc:[]},b:{exp:[],goals:[],sav:[],inc:[]}};
+S.M={a:{exp:[],goals:[],sav:[],inc:[],folders:[]},b:{exp:[],goals:[],sav:[],inc:[],folders:[]}};
 ['exp','goals','sav','inc'].forEach(k=>Object.defineProperty(S,k,{get(){return S.M[S.me][k]},set(v){S.M[S.me][k]=v},enumerable:true}));
 const me=()=>S.me, other=()=>P[S.me].other;
 const col=k=>k==='a'?'c-coral':'c-sky';
@@ -1119,12 +1120,13 @@ function spendHtml(){
 
 function goalHtml(g){
   const pct=Math.min(1,g.saved/g.target),filled=Math.round(pct*10),left=Math.max(0,g.target-g.saved),reached=g.saved>=g.target;
-  return `<section class="goal card px">
+  return `<section class="goal card px">${g.pic?`<img class="gpic" src="${g.pic}" alt="Picture for ${esc(g.name)}">`:''}
     <div class="gtop">${goalIcon(g.kind)}<div class="grow"><h3>${esc(g.name)}</h3><div class="muted">${KINDS[g.kind][0]}</div></div>${reached?'<span class="date px s c-gold">Reached!</span>':`<span class="muted">${Math.round(pct*100)}%</span>`}</div>
     <div class="blocks" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i class="${i<filled?'f':''}"></i>`).join('')}</div>
     <div class="row" style="justify-content:space-between;flex-wrap:wrap"><b>${money(g.saved)}</b><span class="muted">of ${money(g.target)}</span></div>
     <div class="muted" style="font-size:15px">${reached?'Goal complete. Time to celebrate!':money(left)+' to go'}</div>
     <form class="gform" data-gid="${g.id}"><input class="pxin px s" id="gamt-${g.id}" type="number" inputmode="decimal" step="0.01" min="0.01" placeholder="Amount (B$)" aria-label="Amount for ${esc(g.name)}" required><button class="btn px s c-leaf" type="submit" data-mode="add">Add</button><button class="btn px s c-white" type="submit" data-mode="out">Take out</button></form>
+    ${gExtra(g)}
     <div class="ents">${S.gdel===g.id?`<span class="muted">Remove this goal?</span><span class="row"><button class="btn px s c-coral" style="min-height:40px;padding:0 14px" data-act="gdelyes" data-v="${g.id}">Remove</button><button class="btn px s c-white" style="min-height:40px;padding:0 14px" data-act="gdelno">Keep</button></span>`:`<span></span><button class="link" data-act="gdel" data-v="${g.id}">Remove goal</button>`}</div>
   </section>`;
 }
@@ -1137,12 +1139,21 @@ function savingsHtml(){
       <div class="fld"><span>What kind?</span><div class="kinds">${Object.entries(KINDS).map(([k,v])=>`<button type="button" class="chip px s ${S.gkind===k?'on g':''}" data-act="gkind" data-v="${k}">${v[0]}</button>`).join('')}</div></div>
       <label class="fld" for="goalname"><span>Name your goal</span><input class="pxin px s" id="goalname" type="text" value="${KINDS[S.gkind][1]}" placeholder="Our first home" required></label>
       <label class="fld" for="goaltarget"><span>How much do you want to save? (B$)</span><input class="pxin px s" id="goaltarget" type="number" inputmode="decimal" step="0.01" min="1" placeholder="5000" required></label>
+      <label class="fld" for="goallink"><span>Link (optional)</span><input class="pxin px s" id="goallink" type="url" inputmode="url" placeholder="https://..."></label>
+      ${gfolders().length?`<label class="fld" for="goalfold"><span>Folder</span><select class="pxin px s" id="goalfold"><option value="">No folder</option>${gfolders().map(f=>`<option value="${esc(f)}" ${S.gfsel===f?'selected':''}>${esc(f)}</option>`).join('')}</select></label>`:''}
+      <div class="fld"><span>Picture (optional)</span><div id="gpprev">${S.gpic?`<img class="gpic" src="${S.gpic}" alt="Chosen picture">`:''}</div><input class="sr" type="file" id="goalpic" accept="image/*"><label class="btn px s c-white" for="goalpic" style="display:inline-flex;align-items:center;min-height:44px;align-self:flex-start">Add a picture</label></div>
       <button class="btn px s me-${me()}" type="submit">Save goal</button>
       <button class="btn px s c-white" type="button" data-act="gcancel">Cancel</button>
     </form></section>`
   :`<button class="btn px s me-${me()}" data-act="gadd" style="align-self:flex-start">Add a savings goal</button>`;
   const empty=S.goals.length?'':`<section class="card px empty">${spr(SP.star,4)}<h2 style="margin-top:8px">No goals yet</h2><div class="muted">Add one above, like a trip, the wedding or a down payment.</div></section>`;
-  return summary+form+S.goals.map(goalHtml).join('')+empty;
+  const fl=gfolders(),sel=S.gfsel&&(S.gfsel==='all'||fl.includes(S.gfsel))?S.gfsel:'all',cnt=f=>S.goals.filter(g=>(g.folder||'')===f).length;
+  const bar=S.goals.length||fl.length?`<div class="kinds" role="group" aria-label="Folders"><button class="chip px s ${sel==='all'?'on g':''}" data-act="gfsel" data-v="all">All (${S.goals.length})</button>${fl.map(f=>`<button class="chip px s ${sel===f?'on g':''}" data-act="gfsel" data-v="${esc(f)}">${esc(f)} (${cnt(f)})</button>`).join('')}<button class="chip px s c-white" data-act="gfnew">+ Folder</button></div>`:'';
+  const newf=S.gnewf?`<form class="gform" id="gfolderform"><input class="pxin px s" id="gfname" type="text" maxlength="24" placeholder="Folder name, like Trips" aria-label="Folder name" required><button class="btn px s c-leaf" type="submit">Create</button></form>`:'';
+  const del=sel!=='all'?`<button class="link" style="align-self:flex-start" data-act="gfdel" data-v="${esc(sel)}">Delete this folder (the goals are kept)</button>`:'';
+  const shown=S.goals.filter(g=>sel==='all'||(g.folder||'')===sel);
+  const none=S.goals.length&&!shown.length?`<section class="card px empty"><div class="muted">Nothing in this folder yet. Open a goal, tap Edit details, and choose this folder.</div></section>`:'';
+  return summary+bar+newf+del+form+shown.map(goalHtml).join('')+none+empty;
 }
 
 function fmtSigned(n){return (n<0?'-':'+')+'B$'+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -1269,6 +1280,26 @@ function binHtml(){
   const L=S.mbin;if(!L.length)return '';
   const rows=L.slice().sort((a,b)=>(b.del||'').localeCompare(a.del||'')).map(m=>`<div class="qrow"><div class="qt">${esc(m.title)}</div><div class="qsub">${fmtDate(m.date)} · deleted ${fmtDate(m.del)}</div><div class="qlinks"><button class="link" data-act="mrestore" data-v="${m.id}">Restore</button>${S.mbc===m.id?`<span class="muted" style="font-size:15px">Delete for good?</span><button class="link" data-act="mgoneyes" data-v="${m.id}">Yes</button><button class="link" data-act="mgoneno">Keep</button>`:`<button class="link" data-act="mgone" data-v="${m.id}">Delete for good</button>`}</div></div>`).join('');
   return `<section class="card px"><button class="qdrop" data-act="mbin" aria-expanded="${!!S.mbinopen}"><span class="eyebrow" style="margin:0;border:0;padding:0">${FL(2)}Recently deleted</span><b class="qbadge">${L.length}</b><span class="qarr ${S.mbinopen?'open':''}">\u25be</span></button>${S.mbinopen?`<div class="muted" style="font-size:14px;margin:6px 0">Kept for 30 days, then removed for good.</div>${rows}`:''}</section>`}
+const gfolders=()=>(S.M[S.me].folders=S.M[S.me].folders||[]);
+function safeUrl(u){u=(u||'').trim();if(!u)return '';if(!/^[a-z][a-z0-9+.-]*:/i.test(u))u='https://'+u;return /^https?:\/\/[^\s]+\.[^\s]+/i.test(u)?u:''}
+function shrinkGoal(f){return new Promise((ok,no)=>{const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{const k=Math.min(1,360/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',.6))};img.onerror=()=>{URL.revokeObjectURL(url);no(new Error('bad'))};img.src=url})}
+const picRoom=d=>JSON.stringify(S.M[S.me].goals).length+d.length<800000;
+function gExtra(g){
+  const u=safeUrl(g.link),open=S.gedit===g.id;
+  const meta=`<div class="row" style="flex-wrap:wrap;gap:12px;font-size:15px">${g.folder?`<span class="muted">Folder: <b>${esc(g.folder)}</b></span>`:''}${u?`<a class="link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">Open link</a>`:''}<button class="link" data-act="gedit" data-v="${g.id}">${open?'Close details':'Edit details'}</button></div>`;
+  if(!open)return meta;
+  return meta+`<form class="form" data-gedit="${g.id}" style="margin-top:8px"><label class="fld" for="glink-${g.id}"><span>Link (optional)</span><input class="pxin px s" id="glink-${g.id}" type="url" inputmode="url" value="${esc(g.link||'')}" placeholder="https://..."></label>
+    <label class="fld" for="gfold-${g.id}"><span>Folder</span><select class="pxin px s" id="gfold-${g.id}" data-gfold="${g.id}"><option value="">No folder</option>${gfolders().map(f=>`<option value="${esc(f)}" ${g.folder===f?'selected':''}>${esc(f)}</option>`).join('')}</select></label>
+    <div class="row" style="flex-wrap:wrap"><input class="sr" type="file" id="gpicf-${g.id}" accept="image/*" data-gpic="${g.id}"><label class="btn px s c-white" for="gpicf-${g.id}" style="display:inline-flex;align-items:center;min-height:44px">${g.pic?'Change picture':'Add picture'}</label>${g.pic?`<button type="button" class="btn px s c-white" data-act="gpicrm" data-v="${g.id}">Remove picture</button>`:''}</div>
+    <button class="btn px s me-${me()}" type="submit">Save link</button></form>`}
+document.addEventListener('change',async e=>{const t=e.target;
+  if(t.dataset&&t.dataset.gfold){const g=S.goals.find(x=>x.id===+t.dataset.gfold);if(g){g.folder=t.value;render();toast('Moved')}return}
+  if(t.id==='goalpic'||(t.dataset&&t.dataset.gpic)){const f=t.files&&t.files[0];if(!f)return;
+    try{const d=await shrinkGoal(f);if(!picRoom(d)){toast('Picture space is full. Remove a picture first.');return}
+      if(t.id==='goalpic'){S.gpic=d;$('#gpprev').innerHTML=`<img class="gpic" src="${d}" alt="Chosen picture">`}
+      else{const g=S.goals.find(x=>x.id===+t.dataset.gpic);if(g){g.pic=d;render();toast('Picture saved')}}
+    }catch(_){toast('That picture could not be read')}}
+});
 function render(){
   sweepLists();
   S.events.forEach(e=>{if(e.date)e.d=dayDiff(e.date)});
@@ -1337,10 +1368,15 @@ document.addEventListener('click',e=>{
   else if(a==='edel'){S.cdel=+v}
   else if(a==='edelno'){S.cdel=null}
   else if(a==='edelyes'){S.exp=S.exp.filter(x=>x.id!==+v);S.cdel=null;toast('Expense deleted')}
-  else if(a==='gadd'){S.gadd=true;S.gkind='travel'}
+  else if(a==='gadd'){S.gadd=true;S.gkind='travel';S.gpic=null}
   else if(a==='gcancel'){S.gadd=false}
   else if(a==='gdel'){S.gdel=+v}
   else if(a==='gdelno'){S.gdel=null}
+  else if(a==='gedit'){S.gedit=S.gedit===+v?null:+v}
+  else if(a==='gpicrm'){const g=S.goals.find(x=>x.id===+v);if(g)g.pic=''}
+  else if(a==='gfsel'){S.gfsel=v}
+  else if(a==='gfnew'){S.gnewf=!S.gnewf}
+  else if(a==='gfdel'){const m=S.M[S.me];m.folders=gfolders().filter(f=>f!==v);S.goals.forEach(g=>{if(g.folder===v)g.folder=''});S.gfsel='all';toast('Folder deleted')}
   else if(a==='gdelyes'){S.goals=S.goals.filter(x=>x.id!==+v);S.gdel=null;toast('Goal removed')}
   else if(a==='gkind'){
     S.gkind=v;document.querySelectorAll('[data-act=gkind]').forEach(c=>c.classList.toggle('on',c.dataset.v===v));
@@ -1413,9 +1449,16 @@ document.addEventListener('submit',e=>{
     const amt=parseFloat($('#expamt').value),title=$('#exptitle').value.trim();if(!(amt>0)||!title)return;
     S.exp.push({id:uid2(),amt:Math.round(amt*100)/100,title,cat:$('#expcat').value,who:me(),date:$('#expdate').value||todayIso()});
     S.eadd=false;render();toast('Expense saved');earn(2,'Expense saved');
+  }else if(e.target.dataset.gedit){
+    const g=S.goals.find(x=>x.id===+e.target.dataset.gedit);if(!g)return;const raw=$('#glink-'+g.id).value.trim(),u=safeUrl(raw);
+    if(raw&&!u){toast('That link does not look right');return}g.link=u;S.gedit=null;render();toast('Saved');
+  }else if(id==='gfolderform'){
+    const n=$('#gfname').value.trim().slice(0,24);if(!n)return;if(gfolders().includes(n)){toast('That folder already exists');return}
+    gfolders().push(n);S.gfsel=n;S.gnewf=false;render();toast('Folder created');
   }else if(id==='goalform'){
     const name=$('#goalname').value.trim(),target=parseFloat($('#goaltarget').value);if(!name||!(target>0))return;
-    S.goals.push({id:uid2(),name,kind:S.gkind,target,saved:0});
+    const raw=$('#goallink').value.trim(),u=safeUrl(raw);if(raw&&!u){toast('That link does not look right');return}
+    S.goals.push({id:uid2(),name,kind:S.gkind,target,saved:0,link:u,folder:$('#goalfold')?$('#goalfold').value:'',pic:S.gpic||''});S.gpic=null;
     S.gadd=false;render();toast('Savings goal added');
   }else if(e.target.classList.contains('repform')){
     const m=S.mems.find(x=>x.id===+e.target.dataset.mid),inp=e.target.querySelector('input'),v=inp.value.trim();
@@ -2239,8 +2282,8 @@ const SLICES={
     inn:v=>{if(!v)return;if(v.names){P.a.name=v.names.a||P.a.name;P.b.name=v.names.b||P.b.name}if(v.appName)S.appName=v.appName;if(v.chars&&v.chars.a&&v.chars.b)S.chars=v.chars}},
   quests:{path:()=>'shared/quests',out:()=>S.q,inn:v=>{S.q={done:(v&&v.done)||[],act:(v&&v.act)||[],mine:(v&&v.mine)||[],chests:(v&&v.chests)||0,unl:(v&&v.unl)||[],gone:(v&&v.gone)||0}}},
   games:{path:()=>'shared/games',out:gamesOut,inn:gamesIn},
-  money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav,inc:S.M[S.me].inc}),
-    inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[],inc:v.inc||[]}}}
+  money:{path:()=>'private/'+SYNC.user.uid+'/data/money',out:()=>({exp:S.M[S.me].exp,goals:S.M[S.me].goals,sav:S.M[S.me].sav,inc:S.M[S.me].inc,folders:S.M[S.me].folders||[]}),
+    inn:v=>{if(v)S.M[S.me]={exp:v.exp||[],goals:v.goals||[],sav:v.sav||[],inc:v.inc||[],folders:v.folders||[]}}}
 };
 ['a','b'].forEach(k=>{SLICES['person_'+k]={mine:k,path:()=>'shared/person_'+k,
   out:()=>({coins:S.coins[k],own:S.own[k],cl:S.cl.filter(x=>x.k===k).slice(0,30),mood:S.mood[k]||'',moodDay:S.moodDay[k]||'',thinkDay:S.thinkDay[k]||'',thinkTs:S.thinkTs[k]||0}),
